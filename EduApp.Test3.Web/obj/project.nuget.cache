@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "dgSpecHash": "VIKb+FoCHMw=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Tadeas\\RiderProjects\\EduApp.Test3\\EduApp.Test3.Web\\EduApp.Test3.Web.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Tadeas\\.nuget\\packages\\dapper\\2.1.66\\dapper.2.1.66.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.2\\microsoft.aspnetcore.app.internal.assets.10.0.2.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\microsoft.data.sqlite\\11.0.0-preview.1.26104.118\\microsoft.data.sqlite.11.0.0-preview.1.26104.118.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\microsoft.data.sqlite.core\\11.0.0-preview.1.26104.118\\microsoft.data.sqlite.core.11.0.0-preview.1.26104.118.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\mysqlconnector\\2.5.0\\mysqlconnector.2.5.0.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\sourcegear.sqlite3\\3.50.4.2\\sourcegear.sqlite3.3.50.4.2.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\3.0.2\\sqlitepclraw.bundle_e_sqlite3.3.0.2.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\sqlitepclraw.config.e_sqlite3\\3.0.2\\sqlitepclraw.config.e_sqlite3.3.0.2.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\sqlitepclraw.core\\3.0.2\\sqlitepclraw.core.3.0.2.nupkg.sha512",
+    "C:\\Users\\Tadeas\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\3.0.2\\sqlitepclraw.provider.e_sqlite3.3.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

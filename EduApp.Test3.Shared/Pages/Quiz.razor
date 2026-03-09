@@ -1,0 +1,257 @@
+@page "/quiz/{SubjectName}/{TopicName}"
+@page "/quiz/{SubjectName}/{TopicName}/{Limit:int}"
+@using Dapper
+@using Microsoft.Data.Sqlite
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject NavigationManager Navigation
+@inject UserState UserState
+
+<div class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-950 flex flex-col font-outfit overflow-y-auto transition-colors duration-500">
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-200 dark:from-indigo-500/10 via-transparent to-transparent"></div>
+    </div>
+
+    <!-- Horní lišta -->
+    <nav class="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-white/5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md transition-colors">
+        <div class="flex items-center gap-4">
+            <button @onclick='() => Navigation.NavigateTo("/")' class="w-10 h-10 rounded-full flex items-center justify-center nav-back-btn transition">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+            <div>
+                <h1 class="text-slate-900 dark:text-white font-bold text-sm md:text-base uppercase tracking-tight">@SubjectName • @TopicName</h1>
+                <div class="flex items-center gap-2">
+                    <div class="w-24 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div class="bg-indigo-500 h-full transition-all duration-500" style="width: @GetProgress()%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+             <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <i class="ph ph-list-checks text-xl"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Kvíz Content -->
+    <div class="relative z-10 flex-grow flex items-center justify-center p-4 md:p-8">
+        <div class="w-full max-w-5xl">
+            @if (isLoading)
+            {
+                <div class="text-center">
+                    <i class="ph ph-spinner animate-spin text-5xl text-indigo-500 mb-4"></i>
+                    <p class="text-slate-500 dark:text-slate-400 uppercase tracking-widest text-[10px]">Připravuji kvíz...</p>
+                </div>
+            }
+            else if (!quizFinished && questions.Any())
+            {
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center animate-fade-in">
+                    <div class="space-y-6">
+                        <span class="bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-indigo-200 dark:border-indigo-500/20">
+                            Otázka @(currentQuestionIndex + 1) z @questions.Count
+                        </span>
+                        <h2 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight tracking-tighter font-playfair italic">
+                            @CurrentQuestion?.QuestionText
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        @for (int i = 0; i < currentShuffledOptions.Count; i++)
+                        {
+                            var opt = currentShuffledOptions[i];
+                            var visualLabel = new[] { "A", "B", "C", "D" }[i];
+                            var originalLabel = opt.OriginalLabel;
+                            var text = opt.Text;
+                            
+                            <button @onclick='() => SelectAnswer(originalLabel)' 
+                                    class="quiz-option-btn @GetOptionClass(originalLabel) flex items-center p-6 rounded-3xl border transition-all duration-300 text-left group">
+                                <span class="w-12 h-12 rounded-2xl flex items-center justify-center mr-5 font-bold transition shadow-inner letter-box">@visualLabel</span>
+                                <span class="font-medium text-lg">@text</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @if (answered)
+                {
+                    <div class="fixed bottom-0 left-0 right-0 p-6 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-up transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full @(selectedOption == CurrentQuestion?.CorrectOption ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400") flex items-center justify-center">
+                                <i class="ph @(selectedOption == CurrentQuestion?.CorrectOption ? "ph-check" : "ph-x") text-2xl"></i>
+                            </div>
+                            <p class="text-slate-900 dark:text-white font-bold">@CurrentQuestion?.Explanation</p>
+                        </div>
+                        <button @onclick="NextQuestion" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl transition">
+                            Pokračovat
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="glass-card max-w-2xl mx-auto rounded-[40px] p-12 text-center shadow-2xl bounce-in">
+                    <i class="ph ph-star text-8xl text-amber-400 mb-8 inline-block animate-pulse"></i>
+                    <h2 class="text-5xl font-bold text-slate-900 dark:text-white mb-2 tracking-tighter uppercase">Hotovo!</h2>
+                    <div class="text-8xl font-bold text-slate-900 dark:text-white mb-6 tracking-tighter">@score <span class="text-slate-300 dark:text-slate-800">/</span> @questions.Count</div>
+                    
+                    <div class="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-2xl py-3 px-6 mb-10 inline-flex items-center gap-3 text-indigo-700 dark:text-indigo-400">
+                        <i class="ph ph-star-four text-xl"></i>
+                        <span class="font-bold text-lg">+@xpEarned XP</span>
+                    </div>
+
+                    <button @onclick='() => Navigation.NavigateTo("/")' class="w-full home-btn py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition shadow-lg">Zpět na nástěnku</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0, 0, 0, 0.05); backdrop-filter: blur(20px); }
+    .dark .glass-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); }
+    
+    .nav-back-btn { background: #f1f5f9; color: #334155; }
+    .dark .nav-back-btn { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-back-btn:hover { background: #e2e8f0; }
+    .dark .nav-back-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .home-btn { background: #0f172a; color: #ffffff; }
+    .dark .home-btn { background: #ffffff; color: #0f172a; }
+    .home-btn:hover { background: #1e293b; }
+    .dark .home-btn:hover { background: #f8fafc; }
+
+    /* Bezpečné třídy pro kvízové tlačítka (neprůstřelný dark mode) */
+    .quiz-option-default { background: #ffffff; border-color: #e2e8f0; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .dark .quiz-option-default { background: rgba(30, 41, 59, 0.4); border-color: rgba(255,255,255,0.1); color: #ffffff; box-shadow: none; }
+    .quiz-option-default:hover { border-color: #818cf8; background: #f8fafc; }
+    .dark .quiz-option-default:hover { border-color: rgba(99, 102, 241, 0.5); background: rgba(30, 41, 59, 0.6); }
+    
+    .quiz-option-default .letter-box { background: #f1f5f9; color: #4f46e5; }
+    .dark .quiz-option-default .letter-box { background: rgba(15,23,42,0.5); color: #818cf8; }
+    .quiz-option-default:hover .letter-box { background: #4f46e5; color: #ffffff; }
+    .dark .quiz-option-default:hover .letter-box { background: #4f46e5; color: #ffffff; }
+    
+    .quiz-option-correct { background: #ecfdf5; border-color: #34d399; color: #065f46; font-weight: bold; box-shadow: 0 0 20px rgba(16,185,129,0.1); }
+    .dark .quiz-option-correct { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #34d399; box-shadow: 0 0 20px rgba(16,185,129,0.2); }
+    .quiz-option-correct .letter-box { background: rgba(16,185,129,0.2); color: #047857; }
+    .dark .quiz-option-correct .letter-box { background: rgba(16,185,129,0.3); color: #6ee7b7; }
+    
+    .quiz-option-wrong { background: #fef2f2; border-color: #f87171; color: #991b1b; opacity: 0.8; }
+    .dark .quiz-option-wrong { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); color: #f87171; }
+    .quiz-option-wrong .letter-box { background: rgba(239,68,68,0.2); color: #7f1d1d; }
+    .dark .quiz-option-wrong .letter-box { background: rgba(239,68,68,0.3); color: #fca5a5; }
+    
+    .quiz-option-disabled { background: #f8fafc; border-color: #f1f5f9; color: #94a3b8; opacity: 0.5; }
+    .dark .quiz-option-disabled { background: rgba(15, 23, 42, 0.4); border-color: rgba(255,255,255,0.05); color: #64748b; }
+    .quiz-option-disabled .letter-box { background: transparent; color: inherit; }
+
+    .animate-slide-up { animation: slideUp 0.4s ease-out; }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+    @@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+@code {
+    [Parameter] public string SubjectName { get; set; } = "";
+    [Parameter] public string TopicName { get; set; } = "";
+    [Parameter] public int? Limit { get; set; }
+
+    private List<Question> questions = new();
+    private int currentQuestionIndex = 0;
+    private int score = 0;
+    private int xpEarned = 0;
+    private bool answered = false;
+    private string selectedOption = "";
+    private bool quizFinished = false;
+    private bool isLoading = true;
+    private List<QuizOption> currentShuffledOptions = new();
+
+    protected override async Task OnParametersSetAsync() => await LoadQuestionsFromDb();
+
+    private async Task LoadQuestionsFromDb()
+    {
+        isLoading = true;
+        try {
+            var connString = Configuration.GetConnectionString("MyDb");
+            using var connection = new SqliteConnection(connString);
+            
+            var sql = @"SELECT subject, topic, question_text as QuestionText, option_a as OptionA, option_b as OptionB, option_c as OptionC, option_d as OptionD, correct_option as CorrectOption, explanation 
+                        FROM learning_questions WHERE subject = @Subject AND topic = @Topic ORDER BY RANDOM()";
+            
+            if (Limit.HasValue && Limit.Value > 0)
+            {
+                sql += " LIMIT @Limit";
+            }
+
+            var result = await connection.QueryAsync<Question>(sql, new { Subject = SubjectName, Topic = TopicName, Limit = Limit });
+            questions = result.ToList();
+
+            if (questions.Any()) PrepareCurrentOptions();
+        } catch { }
+        finally { isLoading = false; StateHasChanged(); }
+    }
+
+    private Question? CurrentQuestion => questions.ElementAtOrDefault(currentQuestionIndex);
+
+    private void SelectAnswer(string option) {
+        if (answered || CurrentQuestion == null) return;
+        selectedOption = option;
+        answered = true;
+        if (option == CurrentQuestion.CorrectOption) score++;
+    }
+
+    private string GetOptionClass(string option) {
+        if (!answered) return "quiz-option-default";
+        if (option == CurrentQuestion?.CorrectOption) return "quiz-option-correct";
+        if (option == selectedOption && option != CurrentQuestion?.CorrectOption) return "quiz-option-wrong";
+        return "quiz-option-disabled";
+    }
+
+    private async Task NextQuestion() {
+        if (currentQuestionIndex < questions.Count - 1) { 
+            currentQuestionIndex++; 
+            answered = false; 
+            selectedOption = ""; 
+            PrepareCurrentOptions();
+        } 
+        else {
+            quizFinished = true;
+            // Načtení dynamické odměny přes Admin nastavení (výchozí 10)
+            int xpPerQuestion = await UserState.GetXpRewardAsync("xp_quiz", 10);
+            xpEarned = score * xpPerQuestion; 
+            await UserState.AddXpAsync(xpEarned);
+        }
+    }
+
+    private void PrepareCurrentOptions() {
+        if (CurrentQuestion == null) return;
+        
+        var opts = new List<QuizOption> {
+            new QuizOption { OriginalLabel = "A", Text = CurrentQuestion.OptionA },
+            new QuizOption { OriginalLabel = "B", Text = CurrentQuestion.OptionB },
+            new QuizOption { OriginalLabel = "C", Text = CurrentQuestion.OptionC },
+            new QuizOption { OriginalLabel = "D", Text = CurrentQuestion.OptionD }
+        };
+        currentShuffledOptions = opts.OrderBy(x => Random.Shared.Next()).ToList();
+    }
+
+    private int GetProgress() => questions.Any() ? (int)(((double)(currentQuestionIndex) / questions.Count) * 100) : 0;
+
+    public class Question {
+        public string Subject { get; set; } = "";
+        public string Topic { get; set; } = "";
+        public string QuestionText { get; set; } = "";
+        public string OptionA { get; set; } = "";
+        public string OptionB { get; set; } = "";
+        public string OptionC { get; set; } = "";
+        public string OptionD { get; set; } = "";
+        public string CorrectOption { get; set; } = "";
+        public string Explanation { get; set; } = "";
+    }
+
+    public class QuizOption {
+        public string OriginalLabel { get; set; } = "";
+        public string Text { get; set; } = "";
+    }
+}

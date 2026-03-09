@@ -1,0 +1,75 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows,browser
+build_property.RootNamespace = EduApp.Test3.Shared
+build_property.RootNamespace = EduApp.Test3.Shared
+build_property.ProjectDir = C:\Users\Tadeas\RiderProjects\EduApp.Test3\EduApp.Test3.Shared\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Tadeas\RiderProjects\EduApp.Test3\EduApp.Test3.Shared
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Layout/AuthLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEF1dGhMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/AdminPanel.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5QYW5lbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/CzechExam.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ3plY2hFeGFtLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/Flashcards.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmxhc2hjYXJkcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/NotFound.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm90Rm91bmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/Quiz.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUXVpei5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/Register.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVnaXN0ZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Pages/WriteMode.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV3JpdGVNb2RlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Um91dGVzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tadeas/RiderProjects/EduApp.Test3/EduApp.Test3.Shared/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-mwabnnfrv1

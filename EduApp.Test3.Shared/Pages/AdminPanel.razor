@@ -1,0 +1,443 @@
+@page "/admin"
+@using Dapper
+@using Microsoft.Data.Sqlite
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject NavigationManager Navigation
+@inject UserState UserState
+
+<div class="max-w-7xl mx-auto space-y-8 pb-20 relative animate-fade-in p-4 md:p-8">
+    
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-rose-500/20">
+            <i class="ph ph-shield-check text-white text-3xl"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter uppercase font-outfit">Admin Panel</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Správa obsahu, uživatelů a gamifikace</p>
+        </div>
+    </div>
+
+    <!-- Taby -->
+    <div class="flex flex-wrap gap-2 mb-8 bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl w-fit border border-slate-200 dark:border-white/5">
+        <button @onclick="() => currentTab = Tab.Questions" class="px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-xs transition @(currentTab == Tab.Questions ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 hover:text-slate-800 dark:hover:text-white")">
+            <i class="ph ph-database mr-1"></i> Otázky
+        </button>
+        <button @onclick="() => currentTab = Tab.Users" class="px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-xs transition @(currentTab == Tab.Users ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 hover:text-slate-800 dark:hover:text-white")">
+            <i class="ph ph-users mr-1"></i> Uživatelé
+        </button>
+        <button @onclick="() => currentTab = Tab.Settings" class="px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-xs transition @(currentTab == Tab.Settings ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 hover:text-slate-800 dark:hover:text-white")">
+            <i class="ph ph-sliders-horizontal mr-1"></i> XP Nastavení
+        </button>
+    </div>
+
+    <!-- OBSAH TABŮ -->
+    <div class="glass-card rounded-[32px] p-6 md:p-10 shadow-2xl">
+        
+        @if (currentTab == Tab.Questions)
+        {
+            <div class="animate-fade-in">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Přidat novou otázku</h2>
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <span class="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 animate-bounce-in">
+                            <i class="ph ph-check-circle"></i> @statusMessage
+                        </span>
+                    }
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Předmět</label>
+                        <input type="text" @bind="newQuestion.Subject" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition" placeholder="Např. Chemie">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Téma</label>
+                        <input type="text" @bind="newQuestion.Topic" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition" placeholder="Např. Periodická tabulka">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Znění otázky</label>
+                    <textarea @bind="newQuestion.QuestionText" rows="3" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition custom-scrollbar" placeholder="Napište otázku..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Možnost A</label>
+                        <input type="text" @bind="newQuestion.OptionA" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Možnost B</label>
+                        <input type="text" @bind="newQuestion.OptionB" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Možnost C</label>
+                        <input type="text" @bind="newQuestion.OptionC" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Možnost D</label>
+                        <input type="text" @bind="newQuestion.OptionD" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="md:col-span-1">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Správná odpověď</label>
+                        <select @bind="newQuestion.CorrectOption" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition appearance-none cursor-pointer">
+                            <option value="">Vyberte...</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Vysvětlení (nepovinné)</label>
+                        <textarea @bind="newQuestion.Explanation" rows="1" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition custom-scrollbar" placeholder="Proč to tak je?"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-4">
+                    <button @onclick="ClearForm" class="px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800">
+                        Vymazat formulář
+                    </button>
+                    <button @onclick="SaveQuestion" disabled="@isSaving" class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-xl shadow-indigo-500/20 transition active:scale-95 flex items-center gap-2">
+                        @if(isSaving) { <i class="ph ph-spinner animate-spin text-lg"></i> }
+                        Uložit otázku
+                    </button>
+                </div>
+            </div>
+        }
+        else if (currentTab == Tab.Users)
+        {
+            <div class="animate-fade-in">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter mb-6">Registrovaní uživatelé</h2>
+                
+                @if(users == null) {
+                    <div class="text-center py-10"><i class="ph ph-spinner animate-spin text-4xl text-indigo-500"></i></div>
+                } else {
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach (var u in users)
+                        {
+                            <div class="admin-input p-5 rounded-2xl flex flex-col justify-between group">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-bold shrink-0">
+                                            @(string.IsNullOrEmpty(u.Username) ? "?" : u.Username.Substring(0, Math.Min(2, u.Username.Length)).ToUpper())
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <p class="text-sm font-bold text-slate-900 dark:text-white truncate">@u.Username</p>
+                                            <p class="text-[10px] text-slate-500 truncate">@u.Email</p>
+                                        </div>
+                                    </div>
+                                    <button @onclick="() => EditUser(u)" class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-500 hover:text-white transition opacity-0 group-hover:opacity-100">
+                                        <i class="ph ph-pencil-simple"></i>
+                                    </button>
+                                </div>
+                                <div class="flex justify-between items-center border-t border-slate-200 dark:border-white/10 pt-3">
+                                    <div class="text-center">
+                                        <span class="block text-[9px] font-bold text-amber-500 uppercase tracking-widest">Level</span>
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">@u.Level</span>
+                                    </div>
+                                    <div class="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
+                                    <div class="text-center">
+                                        <span class="block text-[9px] font-bold text-indigo-500 uppercase tracking-widest">XP</span>
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">@u.Xp</span>
+                                    </div>
+                                    <div class="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
+                                    <div class="text-center">
+                                        <span class="block text-[9px] font-bold text-orange-500 uppercase tracking-widest">Streak</span>
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">@u.Streak <i class="ph ph-fire text-orange-500"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else if (currentTab == Tab.Settings)
+        {
+            <div class="animate-fade-in max-w-2xl">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Odměny a Gamifikace</h2>
+                        <p class="text-slate-500 text-xs mt-1">Nastavte, kolik zkušeností získá uživatel za jednotlivé aktivity.</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <span class="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 animate-bounce-in">
+                            <i class="ph ph-check-circle"></i> @statusMessage
+                        </span>
+                    }
+                </div>
+
+                <div class="space-y-6 mb-8">
+                    <div class="admin-input p-5 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><i class="ph ph-list-checks text-2xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">Klasický kvíz</h4>
+                                <p class="text-xs text-slate-500">XP za jednu správně zodpovězenou otázku</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" @bind="settings.XpQuiz" class="w-20 text-center font-bold admin-input rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
+                            <span class="text-xs font-bold text-slate-400 uppercase">XP</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-input p-5 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400"><i class="ph ph-cards text-2xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">Kartičky</h4>
+                                <p class="text-xs text-slate-500">XP za každou otočenou a přečtenou kartičku</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" @bind="settings.XpFlashcards" class="w-20 text-center font-bold admin-input rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
+                            <span class="text-xs font-bold text-slate-400 uppercase">XP</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-input p-5 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><i class="ph ph-keyboard text-2xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">Režim Psaní</h4>
+                                <p class="text-xs text-slate-500">XP za každou správně vepsanou odpověď</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" @bind="settings.XpWrite" class="w-20 text-center font-bold admin-input rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
+                            <span class="text-xs font-bold text-slate-400 uppercase">XP</span>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-input p-5 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400"><i class="ph ph-exam text-2xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">Velká zkouška (Cermat/Maturita)</h4>
+                                <p class="text-xs text-slate-500">XP za každý získaný bod v simulaci zkoušky</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" @bind="settings.XpExam" class="w-20 text-center font-bold admin-input rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
+                            <span class="text-xs font-bold text-slate-400 uppercase">XP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button @onclick="SaveSettings" disabled="@isSaving" class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-xl shadow-indigo-500/20 transition active:scale-95 flex items-center gap-2">
+                        @if(isSaving) { <i class="ph ph-spinner animate-spin text-lg"></i> }
+                        Uložit nastavení
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal pro úpravu uživatele -->
+@if (userToEdit != null)
+{
+    <div class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in" @onclick="CloseEditUser">
+        <div class="glass-card max-w-sm w-full rounded-[32px] p-8 relative bounce-in shadow-2xl" @onclick:stopPropagation>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter mb-6">Úprava: @userToEdit.Username</h3>
+            
+            <div class="space-y-4 mb-8">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Úroveň (Level)</label>
+                    <input type="number" @bind="userToEdit.Level" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Zkušenosti (XP)</label>
+                    <input type="number" @bind="userToEdit.Xp" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Série (Streak)</label>
+                    <input type="number" @bind="userToEdit.Streak" class="w-full admin-input rounded-xl px-4 py-3 focus:outline-none transition">
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button @onclick="CloseEditUser" class="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800">Zrušit</button>
+                <button @onclick="SaveUserEdit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition shadow-lg shadow-indigo-500/20">Uložit</button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.05); }
+    .dark .glass-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    .admin-input { background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+    .dark .admin-input { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); color: #ffffff; box-shadow: none; }
+    .admin-input:focus { border-color: #6366f1; }
+    .dark .admin-input:focus { border-color: #818cf8; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
+
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+    @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @@keyframes bounceIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+
+@code {
+    private enum Tab { Questions, Users, Settings }
+    private Tab currentTab = Tab.Questions;
+    private bool isSaving = false;
+    private string statusMessage = "";
+
+    // MODELY
+    public class QuestionDto {
+        public string Subject { get; set; } = "";
+        public string Topic { get; set; } = "";
+        public string QuestionText { get; set; } = "";
+        public string OptionA { get; set; } = "";
+        public string OptionB { get; set; } = "";
+        public string OptionC { get; set; } = "";
+        public string OptionD { get; set; } = "";
+        public string CorrectOption { get; set; } = "";
+        public string Explanation { get; set; } = "";
+    }
+
+    public class UserDto {
+        public string Email { get; set; } = "";
+        public string Username { get; set; } = "";
+        public int Xp { get; set; }
+        public int Level { get; set; }
+        public int Streak { get; set; }
+    }
+
+    public class SettingsDto {
+        public int XpQuiz { get; set; } = 10;
+        public int XpFlashcards { get; set; } = 5;
+        public int XpWrite { get; set; } = 15;
+        public int XpExam { get; set; } = 5;
+    }
+
+    private QuestionDto newQuestion = new();
+    private List<UserDto> users = new();
+    private SettingsDto settings = new();
+    private UserDto? userToEdit = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!UserState.IsAdmin)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        await LoadSettings();
+        await LoadUsers();
+    }
+
+    // -- LOGIKA PRO OTÁZKY --
+    private async Task SaveQuestion()
+    {
+        if (string.IsNullOrWhiteSpace(newQuestion.Subject) || string.IsNullOrWhiteSpace(newQuestion.QuestionText) || string.IsNullOrWhiteSpace(newQuestion.CorrectOption))
+        {
+            statusMessage = "Vyplňte prosím všechna povinná pole!";
+            return;
+        }
+
+        isSaving = true;
+        try
+        {
+            var connString = Configuration.GetConnectionString("MyDb");
+            using var connection = new SqliteConnection(connString);
+            
+            var sql = @"INSERT INTO learning_questions (subject, topic, question_text, option_a, option_b, option_c, option_d, correct_option, explanation) 
+                        VALUES (@Subject, @Topic, @QuestionText, @OptionA, @OptionB, @OptionC, @OptionD, @CorrectOption, @Explanation)";
+            
+            await connection.ExecuteAsync(sql, newQuestion);
+            
+            statusMessage = "Otázka úspěšně uložena!";
+            
+            // Vyčistíme pole, ale necháme Předmět a Téma pro rychlé přidávání dalších
+            newQuestion.QuestionText = "";
+            newQuestion.OptionA = "";
+            newQuestion.OptionB = "";
+            newQuestion.OptionC = "";
+            newQuestion.OptionD = "";
+            newQuestion.CorrectOption = "";
+            newQuestion.Explanation = "";
+            
+            _ = ClearStatusMessageAfterDelay();
+        }
+        catch (Exception ex) { statusMessage = "Chyba: " + ex.Message; }
+        finally { isSaving = false; }
+    }
+
+    private void ClearForm() => newQuestion = new QuestionDto();
+
+    // -- LOGIKA PRO UŽIVATELE --
+    private async Task LoadUsers()
+    {
+        var connString = Configuration.GetConnectionString("MyDb");
+        using var connection = new SqliteConnection(connString);
+        var result = await connection.QueryAsync<UserDto>("SELECT email, username, xp, level, streak FROM users");
+        users = result.ToList();
+    }
+
+    private void EditUser(UserDto u) => userToEdit = new UserDto { Email = u.Email, Username = u.Username, Xp = u.Xp, Level = u.Level, Streak = u.Streak };
+    private void CloseEditUser() => userToEdit = null;
+
+    private async Task SaveUserEdit()
+    {
+        if (userToEdit == null) return;
+        var connString = Configuration.GetConnectionString("MyDb");
+        using var connection = new SqliteConnection(connString);
+        await connection.ExecuteAsync("UPDATE users SET xp = @Xp, level = @Level, streak = @Streak WHERE email = @Email", userToEdit);
+        
+        await LoadUsers();
+        userToEdit = null;
+    }
+
+    // -- LOGIKA PRO NASTAVENÍ --
+    private async Task LoadSettings()
+    {
+        settings.XpQuiz = await UserState.GetXpRewardAsync("xp_quiz", 10);
+        settings.XpFlashcards = await UserState.GetXpRewardAsync("xp_flashcards", 5);
+        settings.XpWrite = await UserState.GetXpRewardAsync("xp_write", 15);
+        settings.XpExam = await UserState.GetXpRewardAsync("xp_exam", 5);
+    }
+
+    private async Task SaveSettings()
+    {
+        isSaving = true;
+        var connString = Configuration.GetConnectionString("MyDb");
+        using var connection = new SqliteConnection(connString);
+        
+        await UpdateSettingDb(connection, "xp_quiz", settings.XpQuiz);
+        await UpdateSettingDb(connection, "xp_flashcards", settings.XpFlashcards);
+        await UpdateSettingDb(connection, "xp_write", settings.XpWrite);
+        await UpdateSettingDb(connection, "xp_exam", settings.XpExam);
+        
+        statusMessage = "Nastavení uloženo!";
+        isSaving = false;
+        _ = ClearStatusMessageAfterDelay();
+    }
+
+    private async Task UpdateSettingDb(SqliteConnection conn, string key, int val)
+    {
+        await conn.ExecuteAsync("INSERT INTO app_settings (setting_key, setting_value) VALUES (@Key, @Val) ON CONFLICT(setting_key) DO UPDATE SET setting_value = @Val", new { Key = key, Val = val });
+    }
+
+    private async Task ClearStatusMessageAfterDelay()
+    {
+        await Task.Delay(3000);
+        statusMessage = "";
+        InvokeAsync(StateHasChanged);
+    }
+}

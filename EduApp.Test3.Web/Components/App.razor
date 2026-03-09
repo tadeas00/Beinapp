@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    <ResourcePreloader/>
+    <link rel="stylesheet" href="_content/EduApp.Test3.Shared/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="_content/EduApp.Test3.Shared/app.css"/>
+    <link rel="stylesheet" href="EduApp.Test3.Web.styles.css"/>
+    <ImportMap/>
+    <link rel="icon" type="image/png" href="_content/EduApp.Test3.Shared/favicon.png"/>
+    <HeadOutlet @rendermode="InteractiveServer"/>
+    <script src="https://unpkg.com/@@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+        darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                    outfit: ['Outfit', 'sans-serif'],
+                    playfair: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+<Routes @rendermode="InteractiveServer"/>
+<ReconnectModal/>
+<script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>
