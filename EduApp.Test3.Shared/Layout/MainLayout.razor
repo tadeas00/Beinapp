@@ -1,0 +1,515 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
+@inject UserState UserState
+@inject IJSRuntime JSRuntime
+@using Dapper
+@using Microsoft.Data.Sqlite
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<div class="@ThemeClass">
+    <div class="page font-outfit min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+        <!-- Globální pozadí s gradienty a texturou -->
+        <div class="fixed inset-0 z-0 pointer-events-none">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 dark:opacity-20 transition-opacity duration-500"></div>
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-indigo-600/20 blur-[120px] rounded-full transition-colors duration-500"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-400/20 dark:bg-purple-600/10 blur-[120px] rounded-full transition-colors duration-500"></div>
+        </div>
+
+        @if (UserState.IsLoggedIn)
+        {
+            <div class="relative z-10 flex flex-col md:flex-row min-h-screen animate-fade-in">
+
+                <!-- Mobilní Header -->
+                <header class="md:hidden flex items-center justify-between p-4 glass-nav sticky top-0 z-50">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="ph ph-rocket-launch text-white text-lg"></i>
+                        </div>
+                        <span class="font-bold tracking-tighter uppercase text-sm text-slate-900 dark:text-white">EduApp</span>
+                    </div>
+                    <button @onclick="ToggleNav" class="text-2xl text-slate-800 dark:text-white p-2">
+                        <i class="ph @(isNavOpen ? "ph-x" : "ph-list")"></i>
+                    </button>
+                </header>
+
+                <!-- Sidebar -->
+                <aside class="@(isNavOpen ? "translate-x-0" : "-translate-x-full") md:translate-x-0 fixed md:sticky top-0 left-0 h-screen w-72 glass-sidebar p-6 flex flex-col transition-transform duration-300 z-40">
+                    <div class="hidden md:flex items-center gap-3 mb-12 px-2">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-xl">
+                            <i class="ph ph-rocket-launch text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tighter uppercase">EduApp<span class="text-indigo-500 dark:text-indigo-400">.pro</span></h1>
+                    </div>
+
+                    <nav class="flex-grow space-y-1.5 overflow-y-auto custom-scrollbar pr-2">
+                        <p class="px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">Hlavní</p>
+
+                        <NavLink href="" class="nav-item" Match="NavLinkMatch.All" @onclick="CloseNav">
+                            <i class="ph ph-grid-four"></i>
+                            <span>Nástěnka</span>
+                        </NavLink>
+
+                        <NavLink href="stats" class="nav-item" @onclick="CloseNav">
+                            <i class="ph ph-chart-line-up"></i>
+                            <span>Můj Progres</span>
+                        </NavLink>
+
+                        <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Knihovna</div>
+
+                        <button @onclick='() => { StartExamSelectionCZ(); CloseNav(); }' class="nav-item w-full text-left text-rose-600 dark:text-rose-300 border-rose-500/10 hover:border-rose-500/30">
+                            <i class="ph ph-books text-rose-500 dark:text-rose-400"></i>
+                            <span>Český jazyk</span>
+                        </button>
+                        
+                        <button @onclick='async () => { await StartSelection("Biologie"); CloseNav(); }' class="nav-item w-full text-left text-emerald-600 dark:text-emerald-300 border-emerald-500/10 hover:border-emerald-500/30">
+                            <i class="ph ph-dna text-emerald-500 dark:text-emerald-400"></i>
+                            <span>Biologie</span>
+                        </button>
+
+                        <button @onclick='async () => { await StartSelection("Chemie"); CloseNav(); }' class="nav-item w-full text-left text-sky-600 dark:text-sky-300 border-sky-500/10 hover:border-sky-500/30">
+                            <i class="ph ph-atom text-sky-500 dark:text-sky-400"></i>
+                            <span>Chemie</span>
+                        </button>
+
+                        <button @onclick='async () => { await StartSelection("Fyzika"); CloseNav(); }' class="nav-item w-full text-left text-blue-600 dark:text-blue-300 border-blue-500/10 hover:border-blue-500/30">
+                            <i class="ph ph-magnet text-blue-500 dark:text-blue-400"></i>
+                            <span>Fyzika</span>
+                        </button>
+
+                        <!-- PŘIDÁNO: Administrace, pokud je uživatel Admin -->
+                        @if (UserState.IsAdmin)
+                        {
+                            <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Správa aplikace</div>
+                            <NavLink href="admin" class="nav-item border-amber-500/10 hover:border-amber-500/30" @onclick="CloseNav">
+                                <i class="ph ph-shield-check text-amber-500 dark:text-amber-400"></i>
+                                <span class="text-amber-700 dark:text-amber-300 font-bold">Admin Panel</span>
+                            </NavLink>
+                        }
+                    </nav>
+
+                    <!-- Spodní panel (Téma + Profil + XP) -->
+                    <div class="mt-auto pt-6 border-t border-slate-200 dark:border-white/5 space-y-4">
+                        <button @onclick="ToggleTheme" class="theme-toggle-btn flex items-center justify-between w-full px-4 py-3 rounded-2xl transition">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest">Režim</span>
+                            <div class="flex items-center gap-2">
+                                <i class="ph ph-sun text-lg @(!isDarkMode ? "text-amber-500" : "text-slate-400 dark:text-slate-600")"></i>
+                                <div class="relative w-10 h-5 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors">
+                                    <div class="absolute top-1 left-1 w-3 h-3 rounded-full bg-white transition-transform duration-300 transform @(isDarkMode ? "translate-x-5" : "")"></div>
+                                </div>
+                                <i class="ph ph-moon text-lg @(isDarkMode ? "text-indigo-400" : "text-slate-400 dark:text-slate-600")"></i>
+                            </div>
+                        </button>
+
+                        <div class="user-profile-card p-4 rounded-2xl flex flex-col gap-3 group w-full">
+                            <div class="flex items-center justify-between w-full">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-bold shrink-0 shadow-inner">
+                                        @(string.IsNullOrEmpty(UserState.UserName) ? "?" : UserState.UserName.Substring(0, Math.Min(2, UserState.UserName.Length)).ToUpper())
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">@UserState.UserName</p>
+                                        <p class="text-[9px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-widest">Level @UserState.Level</p>
+                                    </div>
+                                </div>
+                                <button @onclick="HandleLogout" class="logout-btn transition shrink-0 p-2 rounded-xl" title="Odhlásit se">
+                                    <i class="ph ph-sign-out text-lg"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- XP Progress -->
+                            <div class="w-full space-y-1">
+                                <div class="flex justify-between text-[8px] font-bold uppercase tracking-widest text-slate-500">
+                                    <span>XP: @UserState.Xp</span>
+                                    <span>Další: @UserState.XpToNextLevel</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="bg-amber-500 h-full transition-all duration-500" style="width: @((UserState.XpProgress * 100) / Math.Max(1, UserState.XpRequired))%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Hlavní obsahová oblast s kaskádovým předáním Layoutu -->
+                <main class="flex-grow p-5 md:p-12 overflow-y-auto w-full">
+                    <CascadingValue Value="this">
+                        @Body
+                    </CascadingValue>
+                </main>
+            </div>
+
+            @if (isNavOpen)
+            {
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 md:hidden" @onclick="ToggleNav"></div>
+            }
+
+            <!-- Oslava nového levelu modál -->
+            @if (showLevelUpModal)
+            {
+                <div class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in" @onclick="CloseLevelUpModal">
+                    <div class="glass-card max-w-sm w-full rounded-[40px] p-10 text-center relative bounce-in border border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]" @onclick:stopPropagation>
+                        <i class="ph ph-crown text-7xl text-amber-500 mb-6 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-bounce"></i>
+                        <h2 class="text-4xl font-bold text-slate-900 dark:text-white mb-2 uppercase tracking-tighter">Level Up!</h2>
+                        <p class="text-slate-500 text-sm font-medium mb-8">Dosáhl jsi úrovně @newLevelToShow. Skvělá práce!</p>
+                        <button @onclick="CloseLevelUpModal" class="w-full bg-amber-500 hover:bg-amber-400 text-white font-bold py-4 rounded-2xl uppercase tracking-widest text-xs transition shadow-lg shadow-amber-500/30">Pokračovat</button>
+                    </div>
+                </div>
+            }
+
+            <!-- UNIVERZÁLNÍ MODÁL PŘESUNUTÝ SEM -->
+            @if (isModalOpen) {
+                <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-fade-in">
+                    <div class="glass-card max-w-xl w-full rounded-[40px] p-8 border border-white/10 shadow-2xl relative bounce-in">
+                        
+                        <button @onclick="CloseModal" class="absolute top-6 right-6 text-slate-500 transition z-10 modal-action-btn p-2 rounded-full">
+                            <i class="ph ph-x text-xl"></i>
+                        </button>
+
+                        @if (modalStep == 1) {
+                            <div class="mb-8 pr-12">
+                                <span class="text-indigo-500 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Krok 1/3 • @selectedSubject</span>
+                                <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter mt-1">Vyber téma</h3>
+                            </div>
+                            <div class="space-y-3 max-h-[45vh] overflow-y-auto pr-2 custom-scrollbar">
+                                @if (availableTopics.Any()) {
+                                    @foreach (var topic in availableTopics) {
+                                        <button @onclick='() => SelectTopic(topic)' class="topic-btn group">
+                                            <span class="text-slate-800 dark:text-white font-medium">@topic</span>
+                                            <i class="ph ph-caret-right text-slate-400 dark:text-slate-600 transition group-hover:text-indigo-500 dark:group-hover:text-indigo-400"></i>
+                                        </button>
+                                    }
+                                } else {
+                                    <div class="p-8 text-center bg-slate-100 dark:bg-white/5 rounded-3xl border border-dashed border-slate-300 dark:border-white/10">
+                                        <i class="ph ph-magnifying-glass text-3xl text-slate-400 dark:text-slate-600 mb-2"></i>
+                                        <p class="text-slate-500 text-sm italic">Žádná témata nenalezena.</p>
+                                    </div>
+                                }
+                            </div>
+                        } 
+                        else if (modalStep == 2) {
+                            <div class="flex items-center gap-3 mb-8">
+                                <button @onclick="() => modalStep = 1" class="w-10 h-10 rounded-full flex items-center justify-center text-indigo-500 dark:text-indigo-400 transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <div>
+                                    <span class="text-indigo-500 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Krok 2/3 • @selectedTopic</span>
+                                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Zvolit režim</h3>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button @onclick='() => SelectMode("quiz")' class="mode-btn group"><i class="ph ph-list-checks text-3xl text-indigo-500 dark:text-indigo-400 mb-2"></i><span class="text-[10px] font-bold text-slate-800 dark:text-white uppercase tracking-widest">Kvíz</span></button>
+                                <button @onclick='() => SelectMode("flashcards")' class="mode-btn group"><i class="ph ph-cards text-3xl text-amber-500 dark:text-amber-400 mb-2"></i><span class="text-[10px] font-bold text-slate-800 dark:text-white uppercase tracking-widest">Kartičky</span></button>
+                                <button @onclick='() => SelectMode("write")' class="mode-btn group"><i class="ph ph-keyboard text-3xl text-emerald-500 dark:text-emerald-400 mb-2"></i><span class="text-[10px] font-bold text-slate-800 dark:text-white uppercase tracking-widest">Psaní</span></button>
+                                <button class="mode-btn opacity-40 cursor-not-allowed"><i class="ph ph-brain text-3xl text-purple-500 dark:text-purple-400 mb-2"></i><span class="text-[10px] font-bold text-slate-800 dark:text-white uppercase tracking-widest">Wordkit</span></button>
+                            </div>
+                        }
+                        else if (modalStep == 3) {
+                            <div class="flex items-center gap-3 mb-8">
+                                <button @onclick="() => modalStep = 2" class="w-10 h-10 rounded-full flex items-center justify-center text-indigo-500 dark:text-indigo-400 transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <div>
+                                    <span class="text-indigo-500 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Krok 3/3 • Konfigurace</span>
+                                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Před startem</h3>
+                                </div>
+                            </div>
+
+                            <div class="mb-8">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Počet otázek</label>
+                                <div class="grid grid-cols-4 gap-3">
+                                    @foreach (var val in new[] { 5, 10, 20, 0 }) {
+                                        <button @onclick="() => questionLimit = val" class="limit-btn py-3 rounded-xl font-bold text-xs transition border @(questionLimit == val ? "active border-indigo-500 shadow-lg shadow-indigo-500/20" : "")">@(val == 0 ? "Vše" : val.ToString())</button>
+                                    }
+                                </div>
+                            </div>
+
+                            <button @onclick="StartLearning" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-indigo-500/20 transition active:scale-95 flex items-center justify-center gap-2">
+                                <i class="ph ph-rocket-launch text-xl"></i> Start
+                            </button>
+                        }
+                        else if (modalStep == 9) {
+                            <div class="mb-8">
+                                <span class="bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-200 dark:border-rose-500/30 mb-4 inline-block">Český jazyk</span>
+                                <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Zvolte úroveň</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button @onclick="() => modalStep = 10" class="level-btn group text-left">
+                                    <div class="w-14 h-14 bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition">
+                                        <i class="ph ph-student text-3xl"></i>
+                                    </div>
+                                    <h4 class="text-slate-900 dark:text-white font-bold text-xl uppercase tracking-tight">Přijímačky</h4>
+                                    <p class="text-slate-500 text-xs mt-2 font-medium">CERMAT testy pro 9. třídu</p>
+                                </button>
+                                
+                                <button @onclick="() => modalStep = 11" class="level-btn group text-left">
+                                    <div class="w-14 h-14 bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition">
+                                        <i class="ph ph-graduation-cap text-3xl"></i>
+                                    </div>
+                                    <h4 class="text-slate-900 dark:text-white font-bold text-xl uppercase tracking-tight">Maturita</h4>
+                                    <p class="text-slate-500 text-xs mt-2 font-medium">Didaktické testy pro SŠ</p>
+                                </button>
+                            </div>
+                        }
+                        else if (modalStep == 10) {
+                            <div class="flex items-center gap-3 mb-6">
+                                <button @onclick="() => modalStep = 9" class="w-10 h-10 rounded-full flex items-center justify-center text-rose-500 dark:text-rose-400 transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <div>
+                                    <span class="bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-200 dark:border-rose-500/30 mb-2 inline-block">Přijímací zkoušky</span>
+                                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Výběr sady</h3>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                <button @onclick='() => { CloseModal(); Navigation.NavigateTo("/exam/cj/C9A-2025"); }' class="test-btn active-test group flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Sada C9A 2025</h4>
+                                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Kompletní simulace • 30 úloh • 50 bodů</p>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
+                                        <i class="ph ph-play-fill text-xl text-white"></i>
+                                    </div>
+                                </button>
+
+                                <button @onclick='() => { CloseModal(); Navigation.NavigateTo("/exam/cj/C9B-2025"); }' class="test-btn active-test group flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Sada C9B 2025</h4>
+                                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Kompletní simulace • 30 úloh • 50 bodů</p>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
+                                        <i class="ph ph-play-fill text-xl text-white"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        }
+                        else if (modalStep == 11) {
+                            <div class="flex items-center gap-3 mb-6">
+                                <button @onclick="() => modalStep = 9" class="w-10 h-10 rounded-full flex items-center justify-center text-rose-500 dark:text-rose-400 transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <div>
+                                    <span class="bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-200 dark:border-rose-500/30 mb-2 inline-block">Maturita z ČJ</span>
+                                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Výběr sady</h3>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                <button @onclick='() => { CloseModal(); Navigation.NavigateTo("/exam/cj/M25-PODZIM"); }' class="test-btn active-test group flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Didaktický test podzim 2025</h4>
+                                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Kompletní simulace • 32 úloh • 50 bodů</p>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
+                                        <i class="ph ph-play-fill text-xl text-white"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+
+    .glass-sidebar { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-right: 1px solid rgba(0,0,0,0.05); }
+    .dark .glass-sidebar { background: rgba(15, 23, 42, 0.6); border-right: 1px solid rgba(255,255,255,0.05); }
+    
+    .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .dark .glass-nav { background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    
+    /* Sdílené prvky pro Sidebar */
+    .theme-toggle-btn { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .dark .theme-toggle-btn { background: rgba(255,255,255,0.05); border-color: transparent; box-shadow: none; }
+    .theme-toggle-btn:hover { background: #f8fafc; }
+    .dark .theme-toggle-btn:hover { background: rgba(255,255,255,0.1); }
+    
+    .user-profile-card { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.05); }
+    .dark .user-profile-card { background: rgba(30,41,59,0.4); border: 1px solid rgba(255,255,255,0.05); }
+    
+    .logout-btn { background: #f1f5f9; color: #64748b; }
+    .dark .logout-btn { background: rgba(255,255,255,0.05); color: #94a3b8; }
+    .logout-btn:hover { background: #fee2e2; color: #ef4444; }
+    .dark .logout-btn:hover { background: rgba(239,68,68,0.1); color: #f87171; }
+
+    .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 16px; color: #475569; font-size: 14px; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; border: 1px solid transparent; cursor: pointer; }
+    .dark .nav-item { color: #64748b; }
+    .nav-item:hover { background: rgba(99, 102, 241, 0.05); color: #0f172a; transform: translateX(4px); }
+    .dark .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: #fff; }
+    .nav-item.active { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.15); color: #4f46e5; }
+    .dark .nav-item.active { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.2); box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.05); color: #818cf8; }
+    .nav-item i { font-size: 20px; }
+    
+    /* Styly zkopírované z Modalu (původně v Home) */
+    .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.05); }
+    .dark .glass-card { background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); }
+    
+    .modal-action-btn { background: #f1f5f9; }
+    .dark .modal-action-btn { background: rgba(255,255,255,0.05); }
+    .modal-action-btn:hover { background: #e2e8f0; }
+    .dark .modal-action-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .topic-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 1.25rem; border-radius: 1.25rem; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); transition: 0.3s; }
+    .dark .topic-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+    .topic-btn:hover { border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.05); transform: translateX(4px); }
+    .dark .topic-btn:hover { border-color: rgba(99, 102, 241, 0.4); }
+    
+    .mode-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); padding: 24px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; transition: all 0.3s; width: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .dark .mode-btn { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: none; }
+    .mode-btn:not(.opacity-40):hover { transform: scale(1.05); border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.05); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.1); }
+    .dark .mode-btn:not(.opacity-40):hover { border-color: rgba(99, 102, 241, 0.5); background: rgba(99, 102, 241, 0.1); }
+
+    .limit-btn { background: #ffffff; border-color: #e2e8f0; color: #475569; }
+    .dark .limit-btn { background: rgba(30,41,59,0.5); border-color: rgba(255,255,255,0.05); color: #94a3b8; }
+    .limit-btn:hover { background: #f8fafc; }
+    .dark .limit-btn:hover { background: rgba(30,41,59,0.8); }
+    .limit-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+    .dark .limit-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+    .level-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); padding: 24px; border-radius: 24px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    .dark .level-btn { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: none; }
+    .level-btn:hover { border-color: rgba(251, 113, 133, 0.4); background: rgba(255, 241, 242, 0.8); transform: translateY(-2px); }
+    .dark .level-btn:hover { border-color: rgba(244, 63, 94, 0.5); background: rgba(30, 41, 59, 0.6); }
+
+    .test-btn { width: 100%; text-align: left; padding: 20px; border-radius: 16px; transition: all 0.3s; }
+    .test-btn.active-test { background: #ffffff; border: 1px solid rgba(251, 113, 133, 0.3); box-shadow: 0 4px 15px rgba(244, 63, 94, 0.08); }
+    .dark .test-btn.active-test { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(244, 63, 94, 0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .test-btn.active-test:hover { background: rgba(255, 241, 242, 0.5); border-color: rgba(251, 113, 133, 0.5); transform: scale(0.98); }
+    .dark .test-btn.active-test:hover { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.5); transform: scale(0.98); }
+    
+    .test-btn.locked-test { background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); opacity: 0.6; cursor: not-allowed; }
+    .dark .test-btn.locked-test { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0.5; }
+
+    .font-outfit { font-family: 'Outfit', sans-serif; }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+    @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @@keyframes bounceIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+</style>
+
+@code {
+    private bool isNavOpen = false;
+    private bool isDarkMode = true; 
+    private string ThemeClass => isDarkMode ? "dark" : "";
+
+    // MODÁLNÍ LOGIKA
+    public bool isModalOpen = false;
+    public int modalStep = 1; 
+    public string selectedSubject = "";
+    public string selectedTopic = "";
+    public string selectedMode = "";
+    public int questionLimit = 10;
+    public List<string> availableTopics = new();
+
+    // LEVEL UP MODÁL LOGIKA
+    private bool showLevelUpModal = false;
+    private int newLevelToShow = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!UserState.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+        }
+        UserState.OnChange += StateHasChanged;
+        UserState.OnLevelUp += HandleLevelUp;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var theme = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "theme");
+            if (theme == "light")
+            {
+                isDarkMode = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", isDarkMode ? "dark" : "light");
+    }
+
+    public void Dispose()
+    {
+        UserState.OnChange -= StateHasChanged;
+        UserState.OnLevelUp -= HandleLevelUp;
+    }
+
+    private void HandleLevelUp(int newLevel)
+    {
+        newLevelToShow = newLevel;
+        showLevelUpModal = true;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void CloseLevelUpModal()
+    {
+        showLevelUpModal = false;
+    }
+
+    private void ToggleNav() => isNavOpen = !isNavOpen;
+    private void CloseNav() => isNavOpen = false;
+
+    private void HandleLogout()
+    {
+        UserState.Logout();
+        Navigation.NavigateTo("/login");
+    }
+
+    // VEŘEJNÉ METODY PRO MODAL (aby na ně dosáhl Home.razor přes CascadingParameter)
+    public async Task StartSelection(string subject) {
+        selectedSubject = subject; 
+        modalStep = 1; 
+        isModalOpen = true; 
+        availableTopics.Clear(); 
+        try {
+            var connString = Configuration.GetConnectionString("MyDb");
+            using var connection = new SqliteConnection(connString);
+            var topics = await connection.QueryAsync<string>("SELECT DISTINCT topic FROM learning_questions WHERE subject = @Subject", new { Subject = subject });
+            availableTopics = topics.ToList();
+        } catch (Exception) { availableTopics = new List<string>(); }
+        StateHasChanged();
+    }
+
+    public void StartExamSelectionCZ() { 
+        selectedSubject = "Český jazyk"; 
+        modalStep = 9; 
+        isModalOpen = true; 
+        StateHasChanged();
+    }
+    
+    public void StartExamSelectionAJ() { 
+        selectedSubject = "Anglický jazyk"; 
+        modalStep = 9; 
+        isModalOpen = true; 
+        StateHasChanged();
+    }
+    
+    public void StartExamSelectionMAT() { 
+        selectedSubject = "Matematika"; 
+        modalStep = 9; 
+        isModalOpen = true; 
+        StateHasChanged();
+    }
+    
+    public void SelectTopic(string topic) { selectedTopic = topic; modalStep = 2; StateHasChanged(); }
+    public void SelectMode(string mode) { selectedMode = mode; modalStep = 3; StateHasChanged(); }
+    
+    public void StartLearning() {
+        var limitParam = questionLimit > 0 ? $"/{questionLimit}" : "";
+        Navigation.NavigateTo($"/{selectedMode}/{selectedSubject}/{selectedTopic}{limitParam}");
+        CloseModal();
+    }
+    
+    public void CloseModal() { isModalOpen = false; modalStep = 1; StateHasChanged(); }
+}

@@ -1,0 +1,41 @@
+@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
+
+<div class="@ThemeClass">
+    <div class="page font-outfit min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 transition-colors duration-500 relative">
+        <!-- Globální pozadí -->
+        <div class="fixed inset-0 z-0 pointer-events-none">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 dark:opacity-20 transition-opacity duration-500"></div>
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-indigo-600/20 blur-[120px] rounded-full transition-colors duration-500"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-400/20 dark:bg-purple-600/10 blur-[120px] rounded-full transition-colors duration-500"></div>
+        </div>
+
+        <!-- Samotný obsah stránky (Login / Register) -->
+        <div class="relative z-10 min-h-screen flex flex-col items-center justify-center">
+            @Body
+        </div>
+    </div>
+</div>
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+    .font-outfit { font-family: 'Outfit', sans-serif; }
+</style>
+
+@code {
+    private bool isDarkMode = true;
+    private string ThemeClass => isDarkMode ? "dark" : "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var theme = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "theme");
+            if (theme == "light")
+            {
+                isDarkMode = false;
+                StateHasChanged();
+            }
+        }
+    }
+}

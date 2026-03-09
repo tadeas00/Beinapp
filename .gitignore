@@ -1,0 +1,12 @@
+## .NET / Visual Studio / Rider
+[Bb]in/
+[Oo]bj/
+.idea/
+*.user
+*.userosscache
+/publish/
+
+## MAUI specifické
+*.suo
+*.user
+*.sln.docstates

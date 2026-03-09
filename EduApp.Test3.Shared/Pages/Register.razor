@@ -1,0 +1,119 @@
+@page "/register"
+@layout AuthLayout
+@inject NavigationManager Navigation
+@inject UserState UserState
+
+<div class="w-full max-w-md p-4 animate-fade-in">
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter uppercase font-outfit">Vytvoř si účet</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Začni svou cestu k lepším výsledkům</p>
+    </div>
+
+    <div class="glass-card rounded-[32px] p-8 shadow-2xl">
+        <div class="space-y-4">
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="bg-red-100 dark:bg-red-500/20 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-xs font-bold text-center">
+                    @errorMessage
+                </div>
+            }
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Uživatelské jméno</label>
+                <input type="text" @bind="username" class="w-full auth-input rounded-xl px-4 py-3 focus:outline-none transition" placeholder="TvojeJmeno">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">E-mail</label>
+                <input type="email" @bind="email" class="w-full auth-input rounded-xl px-4 py-3 focus:outline-none transition" placeholder="jmeno@email.cz">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Heslo</label>
+                <input type="password" @bind="password" class="w-full auth-input rounded-xl px-4 py-3 focus:outline-none transition" placeholder="Minimálně 8 znaků">
+            </div>
+            
+            <button @onclick="HandleRegister" disabled="@isLoading" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl transition shadow-lg uppercase tracking-widest text-xs mt-4 active:scale-95 flex items-center justify-center gap-2">
+                @if(isLoading) { <i class="ph ph-spinner animate-spin text-lg"></i> }
+                Vytvořit účet
+            </button>
+        </div>
+
+        <div class="relative my-8 text-center">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-white/5"></div></div>
+            <span class="relative bg-slate-50 dark:bg-slate-950 px-4 text-[10px] font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest">Nebo se registruj přes</span>
+        </div>
+
+        <!-- Sociální registrace (Simulace) -->
+        <div class="grid grid-cols-2 gap-3">
+            <button @onclick='() => HandleSocialRegister("Google")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
+                <i class="ph ph-google-logo text-lg text-red-500 dark:text-red-400"></i> Google
+            </button>
+            <button @onclick='() => HandleSocialRegister("Apple")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
+                <i class="ph ph-apple-logo text-lg"></i> Apple
+            </button>
+        </div>
+    </div>
+
+    <p class="text-center mt-8 text-sm text-slate-500">
+        Už máš účet? 
+        <NavLink href="login" class="text-indigo-500 dark:text-indigo-400 font-bold hover:underline">Přihlas se</NavLink>
+    </p>
+</div>
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.05); }
+    .dark .glass-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    .auth-input { background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .dark .auth-input { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; box-shadow: none; }
+    .auth-input:focus { border-color: #6366f1; }
+    .dark .auth-input:focus { border-color: #818cf8; }
+    
+    .social-btn { background: #ffffff; border: 1px solid #e2e8f0; color: #334155; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .dark .social-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: #ffffff; box-shadow: none; }
+    .social-btn:hover { background: #f8fafc; }
+    .dark .social-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+    @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+@code {
+    private string username = "";
+    private string email = "";
+    private string password = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Vyplň prosím všechna pole.";
+            return;
+        }
+
+        isLoading = true;
+        StateHasChanged();
+
+        // Await zajistí založení uživatele v DB před navigací
+        await UserState.LoginAsync(username, email);
+        
+        isLoading = false;
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task HandleSocialRegister(string provider)
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        string fakeUsername = provider == "Google" ? "Nový Google Uživatel" : "Nový Apple Uživatel";
+        string fakeEmail = $"{provider.ToLower()}@test.pro";
+        
+        await UserState.LoginAsync(fakeUsername, fakeEmail);
+        
+        isLoading = false;
+        Navigation.NavigateTo("/");
+    }
+}
