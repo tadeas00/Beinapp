@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\EduApp.Test3.Shared.props" />
-</Project>
