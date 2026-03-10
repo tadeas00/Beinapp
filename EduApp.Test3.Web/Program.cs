@@ -17,7 +17,7 @@ builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddScoped<UserState>();
 builder.Services.AddSingleton<ExamRepository>();
 
-// 2. Registrace Resend služby (Opraveno pro správnou funkčnost)
+// Registrace Resend služby
 var resendApiKey = builder.Configuration["Resend:ApiKey"] 
                    ?? Environment.GetEnvironmentVariable("Resend__ApiKey") 
                    ?? ""; 
@@ -27,13 +27,12 @@ builder.Services.Configure<ResendClientOptions>(options =>
 {
     options.ApiToken = resendApiKey;
 });
-// AddHttpClient automaticky zaregistruje IResend, není potřeba přidávat AddTransient
 builder.Services.AddHttpClient<IResend, ResendClient>();
 
-// 3. Registrace tvé Emailové služby
+// Registrace tvé Emailové služby
 builder.Services.AddTransient<IEmailService, EmailService>();
 
-// 4. Registrace DB spojení (Sladěno s appsettings.json -> "MyDb")
+// Registrace DB spojení
 builder.Services.AddScoped(sp => 
     new NpgsqlConnection(builder.Configuration.GetConnectionString("MyDb") 
                          ?? Environment.GetEnvironmentVariable("ConnectionStrings__MyDb")));
@@ -53,10 +52,9 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.MapStaticAssets();
 
-// Zastaralý a chybový endpoint /api/register byl smazán. 
-// Registraci nyní plně a bezpečně řeší přímo komponenta Register.razor!
-
+// TADY BYLA CHYBA: Chybělo napojení na sdílenou knihovnu (Shared), kde máš stránky!
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(typeof(ExamRepository).Assembly);
 
 app.Run();
