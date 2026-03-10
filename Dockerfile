@@ -20,4 +20,4 @@ RUN dotnet publish "EduApp.Test3.Web.csproj" -c Release -o /app/publish /p:UseAp
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "EduApp.Test3.dll"]
+ENTRYPOINT ["dotnet", "EduApp.Test3.Web.dll"]
