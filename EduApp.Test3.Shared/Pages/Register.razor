@@ -98,18 +98,17 @@
         isLoading = true;
         StateHasChanged();
 
-        // Kód teď pošle data do databáze, uloží hash a zkontroluje duplicity
-        bool success = await UserState.RegisterAsync(username, email, password);
+        var result = await UserState.RegisterAsync(username, email, password);
         
         isLoading = false;
         
-        if (success) 
+        if (result.Success) 
         {
             Navigation.NavigateTo("/");
         } 
         else 
         {
-            errorMessage = "Účet s tímto e-mailem již existuje.";
+            errorMessage = result.ErrorMessage; // Ukáže přesnou chybovou hlášku
         }
     }
 

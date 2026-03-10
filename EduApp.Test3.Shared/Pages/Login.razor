@@ -99,18 +99,17 @@
         isLoading = true;
         StateHasChanged();
 
-        // Konec testovacího účtu. Nyní se doopravdy ptáme databáze a hashe
-        bool success = await UserState.AuthenticateAsync(email, password);
+        var result = await UserState.AuthenticateAsync(email, password);
         
         isLoading = false;
         
-        if (success) 
+        if (result.Success) 
         {
             Navigation.NavigateTo("/");
         } 
         else 
         {
-            errorMessage = "Nesprávný e-mail nebo heslo.";
+            errorMessage = result.ErrorMessage; // Ukáže přesnou chybovou hlášku
         }
     }
 

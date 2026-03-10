@@ -17,7 +17,6 @@ public class UserState
 
     public bool IsLoggedIn { get; private set; } = false;
     
-    // Pro ukázku ponecháváme admina napevno, ale už musí znát heslo!
     public bool IsAdmin => Email == "admin@test.pro";
     
     public string UserName { get; private set; } = "";
@@ -46,11 +45,11 @@ public class UserState
         return Convert.ToBase64String(hash);
     }
 
-    // Pomocná metoda pro založení tabulky a sloupce s heslem
+    // Explicitně specifikujeme "public.users" pro PostgreSQL
     private async Task EnsureUsersTableAsync(NpgsqlConnection conn)
     {
         await conn.ExecuteAsync(@"
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS public.users (
                 email TEXT PRIMARY KEY,
                 username TEXT,
                 password_hash TEXT,
@@ -59,12 +58,11 @@ public class UserState
                 streak INTEGER DEFAULT 0
             )");
         
-        // Zajištění zpětné kompatibility - pokud sloupec chybí, přidá se
-        try { await conn.ExecuteAsync("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;"); } catch { }
+        try { await conn.ExecuteAsync("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password_hash TEXT;"); } catch { }
     }
 
-    // Reálné ověření údajů (Login)
-    public async Task<bool> AuthenticateAsync(string email, string password)
+    // Nyní vracíme Tuple s chybovou zprávou, abychom viděli přesný problém
+    public async Task<(bool Success, string ErrorMessage)> AuthenticateAsync(string email, string password)
     {
         try
         {
@@ -75,7 +73,7 @@ public class UserState
             var hash = HashPassword(password);
             
             var user = await connection.QueryFirstOrDefaultAsync<UserDbDto>(
-                "SELECT username as Username, xp as Xp, level as Level, streak as Streak FROM users WHERE email = @Email AND password_hash = @Hash", 
+                "SELECT username as Username, xp as Xp, level as Level, streak as Streak FROM public.users WHERE email = @Email AND password_hash = @Hash", 
                 new { Email = email, Hash = hash });
 
             if (user != null)
@@ -87,15 +85,17 @@ public class UserState
                 Level = user.Level;
                 Streak = user.Streak;
                 NotifyStateChanged();
-                return true; // Přihlášení úspěšné
+                return (true, "");
             }
-            return false; // Nesprávné jméno nebo heslo
+            return (false, "Nesprávný e-mail nebo heslo.");
         }
-        catch { return false; }
+        catch (Exception ex) 
+        { 
+            return (false, $"Chyba DB: {ex.Message}"); // Tady zachytíme, co vadí Postgresu
+        }
     }
 
-    // Reálná registrace nového účtu
-    public async Task<bool> RegisterAsync(string username, string email, string password)
+    public async Task<(bool Success, string ErrorMessage)> RegisterAsync(string username, string email, string password)
     {
         try
         {
@@ -103,16 +103,15 @@ public class UserState
             using var connection = new NpgsqlConnection(connString);
             await EnsureUsersTableAsync(connection);
 
-            // Kontrola, zda e-mail už není v databázi
-            var exists = await connection.QueryFirstOrDefaultAsync<int>("SELECT 1 FROM users WHERE email = @Email", new { Email = email });
-            if (exists == 1) return false; // E-mail už je zabraný
+            // Bezpečnější kontrola přes COUNT
+            var exists = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM public.users WHERE email = @Email", new { Email = email });
+            if (exists > 0) return (false, "Účet s tímto e-mailem již existuje.");
 
             var hash = HashPassword(password);
             await connection.ExecuteAsync(
-                "INSERT INTO users (email, username, password_hash, xp, level, streak) VALUES (@Email, @UserName, @Hash, 0, 1, 0)",
+                "INSERT INTO public.users (email, username, password_hash, xp, level, streak) VALUES (@Email, @UserName, @Hash, 0, 1, 0)",
                 new { Email = email, UserName = username, Hash = hash });
 
-            // Rovnou uživatele přihlásíme do aplikace
             IsLoggedIn = true;
             Email = email;
             UserName = username;
@@ -120,9 +119,12 @@ public class UserState
             Level = 1;
             Streak = 0;
             NotifyStateChanged();
-            return true;
+            return (true, "");
         }
-        catch { return false; }
+        catch (Exception ex) 
+        { 
+            return (false, $"Chyba DB: {ex.Message}"); // Tady zachytíme, co vadí Postgresu
+        }
     }
 
     public void Logout()
@@ -162,7 +164,7 @@ public class UserState
             var connString = _config.GetConnectionString("MyDb");
             using var connection = new NpgsqlConnection(connString);
             await connection.ExecuteAsync(
-                "UPDATE users SET xp = @Xp, level = @Level WHERE email = @Email",
+                "UPDATE public.users SET xp = @Xp, level = @Level WHERE email = @Email",
                 new { Xp, Level, Email });
         }
         catch { }
@@ -178,15 +180,15 @@ public class UserState
             var connString = _config.GetConnectionString("MyDb");
             using var connection = new NpgsqlConnection(connString);
             
-            await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS app_settings (setting_key TEXT PRIMARY KEY, setting_value INTEGER)");
+            await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS public.app_settings (setting_key TEXT PRIMARY KEY, setting_value INTEGER)");
             
             var val = await connection.QueryFirstOrDefaultAsync<int?>(
-                "SELECT setting_value FROM app_settings WHERE setting_key = @Key", new { Key = modeKey });
+                "SELECT setting_value FROM public.app_settings WHERE setting_key = @Key", new { Key = modeKey });
                 
             if (val.HasValue) return val.Value;
             
             await connection.ExecuteAsync(
-                "INSERT INTO app_settings (setting_key, setting_value) VALUES (@Key, @Val)", 
+                "INSERT INTO public.app_settings (setting_key, setting_value) VALUES (@Key, @Val)", 
                 new { Key = modeKey, Val = defaultValue });
                 
             return defaultValue;
