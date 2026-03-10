@@ -1,7 +1,7 @@
 @page "/write/{SubjectName}/{TopicName}"
 @page "/write/{SubjectName}/{TopicName}/{Limit:int}"
 @using Dapper
-@using Microsoft.Data.Sqlite
+@using Npgsql
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
@@ -222,7 +222,7 @@
         isLoading = true;
         try {
             var connString = Configuration.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
+            using var connection = new NpgsqlConnection(connString);
             var sql = @"SELECT question_text as QuestionText, option_a as OptionA, option_b as OptionB, option_c as OptionC, option_d as OptionD, correct_option as CorrectOption, explanation 
                         FROM learning_questions WHERE subject = @Subject AND topic = @Topic ORDER BY RANDOM()";
 
@@ -354,7 +354,6 @@
         else
         {
             isFinished = true;
-            // Dynamická odměna za psaní (výchozí 15 XP za správnou)
             int xpPerWrite = await UserState.GetXpRewardAsync("xp_write", 15);
             xpEarned = score * xpPerWrite;
             await UserState.AddXpAsync(xpEarned);

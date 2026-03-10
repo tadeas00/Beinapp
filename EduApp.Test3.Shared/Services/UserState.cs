@@ -1,8 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
+using Npgsql;
 using Microsoft.Extensions.Configuration;
 using Dapper;
+using System.Security.Cryptography;
+using System.Text;
 
 public class UserState
 {
@@ -15,7 +17,7 @@ public class UserState
 
     public bool IsLoggedIn { get; private set; } = false;
     
-    // Jednoduchá kontrola admina (můžeš později napojit na DB roli)
+    // Pro ukázku ponecháváme admina napevno, ale už musí znát heslo!
     public bool IsAdmin => Email == "admin@test.pro";
     
     public string UserName { get; private set; } = "";
@@ -35,14 +37,92 @@ public class UserState
 
     private int GetXpForLevel(int level) => (level - 1) * level * 50;
 
-    public async Task LoginAsync(string userName, string email)
+    // Bezpečné hashování hesla (SHA-256)
+    private string HashPassword(string password)
     {
-        IsLoggedIn = true;
-        UserName = userName;
-        Email = email;
+        using var sha256 = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(password);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
+    }
+
+    // Pomocná metoda pro založení tabulky a sloupce s heslem
+    private async Task EnsureUsersTableAsync(NpgsqlConnection conn)
+    {
+        await conn.ExecuteAsync(@"
+            CREATE TABLE IF NOT EXISTS users (
+                email TEXT PRIMARY KEY,
+                username TEXT,
+                password_hash TEXT,
+                xp INTEGER DEFAULT 0,
+                level INTEGER DEFAULT 1,
+                streak INTEGER DEFAULT 0
+            )");
         
-        await LoadUserDataAsync();
-        NotifyStateChanged();
+        // Zajištění zpětné kompatibility - pokud sloupec chybí, přidá se
+        try { await conn.ExecuteAsync("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;"); } catch { }
+    }
+
+    // Reálné ověření údajů (Login)
+    public async Task<bool> AuthenticateAsync(string email, string password)
+    {
+        try
+        {
+            var connString = _config.GetConnectionString("MyDb");
+            using var connection = new NpgsqlConnection(connString);
+            await EnsureUsersTableAsync(connection);
+
+            var hash = HashPassword(password);
+            
+            var user = await connection.QueryFirstOrDefaultAsync<UserDbDto>(
+                "SELECT username as Username, xp as Xp, level as Level, streak as Streak FROM users WHERE email = @Email AND password_hash = @Hash", 
+                new { Email = email, Hash = hash });
+
+            if (user != null)
+            {
+                IsLoggedIn = true;
+                Email = email;
+                UserName = user.Username;
+                Xp = user.Xp;
+                Level = user.Level;
+                Streak = user.Streak;
+                NotifyStateChanged();
+                return true; // Přihlášení úspěšné
+            }
+            return false; // Nesprávné jméno nebo heslo
+        }
+        catch { return false; }
+    }
+
+    // Reálná registrace nového účtu
+    public async Task<bool> RegisterAsync(string username, string email, string password)
+    {
+        try
+        {
+            var connString = _config.GetConnectionString("MyDb");
+            using var connection = new NpgsqlConnection(connString);
+            await EnsureUsersTableAsync(connection);
+
+            // Kontrola, zda e-mail už není v databázi
+            var exists = await connection.QueryFirstOrDefaultAsync<int>("SELECT 1 FROM users WHERE email = @Email", new { Email = email });
+            if (exists == 1) return false; // E-mail už je zabraný
+
+            var hash = HashPassword(password);
+            await connection.ExecuteAsync(
+                "INSERT INTO users (email, username, password_hash, xp, level, streak) VALUES (@Email, @UserName, @Hash, 0, 1, 0)",
+                new { Email = email, UserName = username, Hash = hash });
+
+            // Rovnou uživatele přihlásíme do aplikace
+            IsLoggedIn = true;
+            Email = email;
+            UserName = username;
+            Xp = 0;
+            Level = 1;
+            Streak = 0;
+            NotifyStateChanged();
+            return true;
+        }
+        catch { return false; }
     }
 
     public void Logout()
@@ -56,43 +136,12 @@ public class UserState
         NotifyStateChanged();
     }
 
-    private async Task LoadUserDataAsync()
+    private class UserDbDto 
     {
-        try
-        {
-            var connString = _config.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
-            
-            await connection.ExecuteAsync(@"
-                CREATE TABLE IF NOT EXISTS users (
-                    email TEXT PRIMARY KEY,
-                    username TEXT,
-                    xp INTEGER DEFAULT 0,
-                    level INTEGER DEFAULT 1,
-                    streak INTEGER DEFAULT 0
-                )");
-
-            var user = await connection.QueryFirstOrDefaultAsync<dynamic>(
-                "SELECT xp as Xp, level as Level, streak as Streak FROM users WHERE email = @Email", 
-                new { Email });
-
-            if (user != null)
-            {
-                Xp = (int)user.Xp;
-                Level = (int)user.Level;
-                Streak = (int)user.Streak;
-            }
-            else
-            {
-                await connection.ExecuteAsync(
-                    "INSERT INTO users (email, username, xp, level, streak) VALUES (@Email, @UserName, 0, 1, 0)",
-                    new { Email, UserName });
-                Xp = 0;
-                Level = 1;
-                Streak = 0;
-            }
-        }
-        catch { }
+        public string Username { get; set; } = "";
+        public int Xp { get; set; }
+        public int Level { get; set; }
+        public int Streak { get; set; }
     }
 
     public async Task AddXpAsync(int xpEarned)
@@ -111,7 +160,7 @@ public class UserState
         try
         {
             var connString = _config.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
+            using var connection = new NpgsqlConnection(connString);
             await connection.ExecuteAsync(
                 "UPDATE users SET xp = @Xp, level = @Level WHERE email = @Email",
                 new { Xp, Level, Email });
@@ -122,15 +171,13 @@ public class UserState
         NotifyStateChanged();
     }
 
-    // NOVÉ: Metoda pro načtení dynamických XP odměn z DB
     public async Task<int> GetXpRewardAsync(string modeKey, int defaultValue)
     {
         try
         {
             var connString = _config.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
+            using var connection = new NpgsqlConnection(connString);
             
-            // Zajistí existenci tabulky pro nastavení
             await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS app_settings (setting_key TEXT PRIMARY KEY, setting_value INTEGER)");
             
             var val = await connection.QueryFirstOrDefaultAsync<int?>(
@@ -138,7 +185,6 @@ public class UserState
                 
             if (val.HasValue) return val.Value;
             
-            // Pokud nastavení neexistuje, vytvoří ho s výchozí hodnotou
             await connection.ExecuteAsync(
                 "INSERT INTO app_settings (setting_key, setting_value) VALUES (@Key, @Val)", 
                 new { Key = modeKey, Val = defaultValue });

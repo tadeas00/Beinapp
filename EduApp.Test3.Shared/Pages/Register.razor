@@ -13,7 +13,7 @@
         <div class="space-y-4">
             @if (!string.IsNullOrEmpty(errorMessage))
             {
-                <div class="bg-red-100 dark:bg-red-500/20 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-xs font-bold text-center">
+                <div class="bg-red-100 dark:bg-red-500/20 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-xs font-bold text-center animate-bounce-in">
                     @errorMessage
                 </div>
             }
@@ -42,12 +42,12 @@
             <span class="relative bg-slate-50 dark:bg-slate-950 px-4 text-[10px] font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest">Nebo se registruj přes</span>
         </div>
 
-        <!-- Sociální registrace (Simulace) -->
+        <!-- Sociální registrace (Zatím vizuální) -->
         <div class="grid grid-cols-2 gap-3">
-            <button @onclick='() => HandleSocialRegister("Google")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
+            <button @onclick='() => ShowSocialError("Google")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
                 <i class="ph ph-google-logo text-lg text-red-500 dark:text-red-400"></i> Google
             </button>
-            <button @onclick='() => HandleSocialRegister("Apple")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
+            <button @onclick='() => ShowSocialError("Apple")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
                 <i class="ph ph-apple-logo text-lg"></i> Apple
             </button>
         </div>
@@ -75,6 +75,8 @@
 
     .animate-fade-in { animation: fadeIn 0.4s ease-out; }
     @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-bounce-in { animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @@keyframes bounceIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
 
 @code {
@@ -96,24 +98,23 @@
         isLoading = true;
         StateHasChanged();
 
-        // Await zajistí založení uživatele v DB před navigací
-        await UserState.LoginAsync(username, email);
+        // Kód teď pošle data do databáze, uloží hash a zkontroluje duplicity
+        bool success = await UserState.RegisterAsync(username, email, password);
         
         isLoading = false;
-        Navigation.NavigateTo("/");
+        
+        if (success) 
+        {
+            Navigation.NavigateTo("/");
+        } 
+        else 
+        {
+            errorMessage = "Účet s tímto e-mailem již existuje.";
+        }
     }
 
-    private async Task HandleSocialRegister(string provider)
+    private void ShowSocialError(string provider)
     {
-        isLoading = true;
-        StateHasChanged();
-
-        string fakeUsername = provider == "Google" ? "Nový Google Uživatel" : "Nový Apple Uživatel";
-        string fakeEmail = $"{provider.ToLower()}@test.pro";
-        
-        await UserState.LoginAsync(fakeUsername, fakeEmail);
-        
-        isLoading = false;
-        Navigation.NavigateTo("/");
+        errorMessage = $"Registrace přes {provider} zatím není napojena.";
     }
 }

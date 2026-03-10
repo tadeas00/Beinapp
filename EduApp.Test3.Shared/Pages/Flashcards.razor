@@ -1,7 +1,7 @@
 @page "/flashcards/{SubjectName}/{TopicName}"
 @page "/flashcards/{SubjectName}/{TopicName}/{Limit:int}"
 @using Dapper
-@using Microsoft.Data.Sqlite
+@using Npgsql
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
@@ -195,7 +195,7 @@
         isLoading = true;
         try {
             var connString = Configuration.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
+            using var connection = new NpgsqlConnection(connString);
             var sql = @"SELECT question_text as QuestionText, option_a as OptionA, option_b as OptionB, option_c as OptionC, option_d as OptionD, correct_option as CorrectOption, explanation as Explanation 
                         FROM learning_questions WHERE subject = @Subject AND topic = @Topic ORDER BY RANDOM()";
             

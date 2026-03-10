@@ -1,6 +1,6 @@
 @page "/admin"
 @using Dapper
-@using Microsoft.Data.Sqlite
+@using Npgsql
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
@@ -355,7 +355,7 @@
         try
         {
             var connString = Configuration.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
+            using var connection = new NpgsqlConnection(connString);
             
             var sql = @"INSERT INTO learning_questions (subject, topic, question_text, option_a, option_b, option_c, option_d, correct_option, explanation) 
                         VALUES (@Subject, @Topic, @QuestionText, @OptionA, @OptionB, @OptionC, @OptionD, @CorrectOption, @Explanation)";
@@ -385,7 +385,7 @@
     private async Task LoadUsers()
     {
         var connString = Configuration.GetConnectionString("MyDb");
-        using var connection = new SqliteConnection(connString);
+        using var connection = new NpgsqlConnection(connString);
         var result = await connection.QueryAsync<UserDto>("SELECT email, username, xp, level, streak FROM users");
         users = result.ToList();
     }
@@ -397,7 +397,7 @@
     {
         if (userToEdit == null) return;
         var connString = Configuration.GetConnectionString("MyDb");
-        using var connection = new SqliteConnection(connString);
+        using var connection = new NpgsqlConnection(connString);
         await connection.ExecuteAsync("UPDATE users SET xp = @Xp, level = @Level, streak = @Streak WHERE email = @Email", userToEdit);
         
         await LoadUsers();
@@ -417,7 +417,7 @@
     {
         isSaving = true;
         var connString = Configuration.GetConnectionString("MyDb");
-        using var connection = new SqliteConnection(connString);
+        using var connection = new NpgsqlConnection(connString);
         
         await UpdateSettingDb(connection, "xp_quiz", settings.XpQuiz);
         await UpdateSettingDb(connection, "xp_flashcards", settings.XpFlashcards);
@@ -429,8 +429,9 @@
         _ = ClearStatusMessageAfterDelay();
     }
 
-    private async Task UpdateSettingDb(SqliteConnection conn, string key, int val)
+    private async Task UpdateSettingDb(NpgsqlConnection conn, string key, int val)
     {
+        // Postgres ON CONFLICT syntaxe funguje nádherně:
         await conn.ExecuteAsync("INSERT INTO app_settings (setting_key, setting_value) VALUES (@Key, @Val) ON CONFLICT(setting_key) DO UPDATE SET setting_value = @Val", new { Key = key, Val = val });
     }
 

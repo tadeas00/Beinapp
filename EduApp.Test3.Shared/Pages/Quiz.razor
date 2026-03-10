@@ -1,7 +1,7 @@
 @page "/quiz/{SubjectName}/{TopicName}"
 @page "/quiz/{SubjectName}/{TopicName}/{Limit:int}"
 @using Dapper
-@using Microsoft.Data.Sqlite
+@using Npgsql
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
@@ -121,7 +121,6 @@
     .home-btn:hover { background: #1e293b; }
     .dark .home-btn:hover { background: #f8fafc; }
 
-    /* Bezpečné třídy pro kvízové tlačítka (neprůstřelný dark mode) */
     .quiz-option-default { background: #ffffff; border-color: #e2e8f0; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .dark .quiz-option-default { background: rgba(30, 41, 59, 0.4); border-color: rgba(255,255,255,0.1); color: #ffffff; box-shadow: none; }
     .quiz-option-default:hover { border-color: #818cf8; background: #f8fafc; }
@@ -174,7 +173,7 @@
         isLoading = true;
         try {
             var connString = Configuration.GetConnectionString("MyDb");
-            using var connection = new SqliteConnection(connString);
+            using var connection = new NpgsqlConnection(connString);
             
             var sql = @"SELECT subject, topic, question_text as QuestionText, option_a as OptionA, option_b as OptionB, option_c as OptionC, option_d as OptionD, correct_option as CorrectOption, explanation 
                         FROM learning_questions WHERE subject = @Subject AND topic = @Topic ORDER BY RANDOM()";
@@ -217,7 +216,6 @@
         } 
         else {
             quizFinished = true;
-            // Načtení dynamické odměny přes Admin nastavení (výchozí 10)
             int xpPerQuestion = await UserState.GetXpRewardAsync("xp_quiz", 10);
             xpEarned = score * xpPerQuestion; 
             await UserState.AddXpAsync(xpEarned);
