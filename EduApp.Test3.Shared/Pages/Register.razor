@@ -1,7 +1,9 @@
 @page "/register"
 @layout AuthLayout
+@using EduApp.Test3.Web.Services
 @inject NavigationManager Navigation
 @inject UserState UserState
+@inject IEmailService EmailService
 
 <div class="w-full max-w-md p-4 animate-fade-in">
     <div class="text-center mb-10">
@@ -97,16 +99,28 @@
         isLoading = true;
         StateHasChanged();
 
+        // 1. Provedeme samotnou registraci v databázi
         var result = await UserState.RegisterAsync(username, email, password);
-        
-        isLoading = false;
         
         if (result.Success) 
         {
+            // 2. Pokud registrace v DB prošla, zkusíme poslat mail
+            try 
+            {
+                await EmailService.SendRegistrationEmailAsync(email, username);
+            }
+            catch (Exception ex)
+            {
+                // Pokud mail selže, nezastavujeme uživatele, jen zalogujeme chybu
+                Console.WriteLine($"Chyba při odesílání mailu: {ex.Message}");
+            }
+
+            isLoading = false;
             Navigation.NavigateTo("/");
         } 
         else 
         {
+            isLoading = false;
             errorMessage = result.ErrorMessage;
         }
     }
