@@ -8,12 +8,10 @@
 @inject UserState UserState
 
 <div class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-950 flex flex-col font-outfit overflow-y-auto transition-colors duration-500">
-    <!-- Pozadí -->
     <div class="fixed inset-0 z-0 pointer-events-none">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-200 dark:from-indigo-500/10 via-transparent to-transparent"></div>
     </div>
-
-    <!-- Horní lišta -->
+    
     <nav class="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-white/5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md transition-colors">
         <div class="flex items-center gap-4">
             <button @onclick='() => Navigation.NavigateTo("/")' class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-200/50 dark:bg-white/5 hover:bg-slate-300/50 dark:hover:bg-white/10 text-slate-700 dark:text-white transition">
@@ -34,8 +32,7 @@
             </div>
         </div>
     </nav>
-
-    <!-- Obsah -->
+    
     <div class="relative z-10 flex-grow flex items-center justify-center p-4 md:p-8">
         <div class="w-full max-w-3xl">
             @if (isLoading)
@@ -48,15 +45,14 @@
             else if (!isFinished && questions.Any())
             {
             <div class="space-y-12 animate-fade-in">
-                <!-- Otázka -->
+                
                 <div class="text-center space-y-4">
                     <span class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-[0.3em]">Zbývá otázek: @(questions.Count - currentIndex)</span>
                     <h2 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight tracking-tighter font-playfair italic px-4">
                         @CurrentQuestion?.QuestionText
                     </h2>
                 </div>
-
-                <!-- Vstupní pole -->
+                
                 <div class="relative max-w-xl mx-auto">
                     <input @bind="userInput"
                            @bind:event="oninput"
@@ -90,8 +86,7 @@
                     </div>
                     }
                 </div>
-
-                <!-- Nápověda / Zobrazení správné odpovědi -->
+                
                 @if (isAnswered && answerStatus != AnswerStatus.Correct)
                 {
                 <div class="glass-card rounded-3xl p-6 border-indigo-500/20 max-w-xl mx-auto animate-slide-up text-center">

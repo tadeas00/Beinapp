@@ -8,8 +8,7 @@
     <div class="fixed inset-0 z-0 pointer-events-none">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-rose-200 dark:from-rose-900/10 via-slate-50 dark:via-slate-950 to-slate-50 dark:to-slate-950"></div>
     </div>
-
-    <!-- Horní lišta -->
+    
     <nav class="relative z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-white/5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md transition-colors">
         <div class="flex items-center gap-4">
             <button @onclick="HandleClose" class="w-10 h-10 rounded-full flex items-center justify-center nav-back-btn transition">
@@ -37,8 +36,7 @@
             </div>
         </div>
     </nav>
-
-    <!-- Hlavní obsah -->
+    
     <div class="relative z-10 flex-grow overflow-y-auto custom-scrollbar p-4 md:p-8">
         <div class="max-w-7xl mx-auto">
             
@@ -46,7 +44,6 @@
             {
                 <div class="flex flex-col xl:flex-row gap-6 animate-fade-in pb-40">
                     
-                    <!-- Levé okno: Výchozí text -->
                     @if (!string.IsNullOrEmpty(CurrentTask.TextBase))
                     {
                         <div class="w-full xl:w-1/2">
@@ -58,25 +55,21 @@
                             </div>
                         </div>
                     }
-
-                    <!-- Pravé okno -->
+                    
                     <div class="w-full @GetRightPanelClass()">
                         <div class="glass-card rounded-3xl p-6 md:p-8 shadow-xl flex flex-col space-y-6">
                             
-                            <!-- Hlavička úlohy -->
                             <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/5">
                                 <span class="bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
                                     Úloha @CurrentTask.TaskNumber
                                 </span>
                                 <span class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Max: @CurrentTask.MaxPoints b.</span>
                             </div>
-
-                            <!-- Zadání -->
+                            
                             <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
                                 @CurrentTask.Instruction
                             </h2>
-
-                            <!-- VÝBĚR Z MOŽNOSTÍ -->
+                            
                             @if (CurrentTask.Category == TaskCategory.MultipleChoice)
                             {
                                 <div class="grid gap-2.5">
@@ -114,8 +107,7 @@
                                     }
                                 </div>
                             }
-
-                            <!-- PŘIŘAZOVÁNÍ -->
+                            
                             @if (CurrentTask.Category == TaskCategory.Matching)
                             {
                                 <div class="space-y-4">
@@ -158,8 +150,7 @@
                                     </div>
                                 </div>
                             }
-
-                            <!-- ANO/NE -->
+                            
                             @if (CurrentTask.Category == TaskCategory.TrueFalse)
                             {
                                 <div class="space-y-2">
@@ -232,8 +223,7 @@
                                     }
                                 </div>
                             }
-
-                            <!-- DOPLŇOVÁNÍ / OPRAVA -->
+                            
                             @if (CurrentTask.Category == TaskCategory.Correction || CurrentTask.Category == TaskCategory.Filling)
                             {
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -279,8 +269,7 @@
                                     </div>
                                 }
                             }
-
-                            <!-- ZÁVĚREČNÉ VYSVĚTLENÍ -->
+                            
                             @if (CurrentTask.IsEvaluated && !string.IsNullOrEmpty(CurrentTask.Explanation))
                             {
                                 <div class="bg-emerald-50 dark:bg-emerald-500/5 p-5 md:p-6 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 animate-slide-up shadow-lg mt-4">
@@ -297,8 +286,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Fixní spodní lišta pro Zkoušku i Prohlížení -->
+                
                 <div class="fixed bottom-0 left-0 right-0 p-5 md:p-6 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200 dark:border-white/10 flex items-center justify-between z-[60] transition-colors">
                     @if (currentView == ViewState.Exam)
                     {
@@ -351,7 +339,6 @@
             }
             else if (currentView == ViewState.Summary)
             {
-                <!-- SHRNUTÍ -->
                 <div class="glass-card max-w-2xl mx-auto rounded-[40px] p-8 md:p-12 text-center shadow-2xl bounce-in mt-10">
                     <div class="w-24 h-24 bg-rose-100 dark:bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(244,63,94,0.1)] dark:shadow-[0_0_30px_rgba(244,63,94,0.2)]">
                         <i class="ph ph-trophy text-6xl text-rose-500"></i>
@@ -381,7 +368,6 @@
             }
             else if (currentView == ViewState.ReviewGrid)
             {
-                <!-- MŘÍŽKA S PŘEHLEDEM VÝSLEDKŮ -->
                 <div class="max-w-5xl mx-auto py-4 md:py-8 animate-fade-in pb-20">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                         <div>
@@ -425,7 +411,6 @@
 </div>
 
 <style>
-    /* Obecné styly */
     .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(0,0,0,0.05); }
     .dark .glass-card { background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.05); }
     
@@ -548,8 +533,7 @@
     private ViewState currentView = ViewState.Exam;
 
     private CermatTask CurrentTask => tasks.ElementAtOrDefault(currentTaskIndex);
-
-    // --- Pomocné metody pro HTML atributy k odstranění chyb Razor parseru ---
+    
     private string GetHeaderIcon() => currentView == ViewState.ReviewTask || currentView == ViewState.ReviewGrid ? "ph-arrow-left" : "ph-x";
     private string GetHeaderPulseClass() => currentView == ViewState.Exam ? "bg-rose-500 animate-pulse" : "bg-indigo-500";
     private string GetRightPanelClass() => string.IsNullOrEmpty(CurrentTask?.TextBase) ? "max-w-3xl mx-auto" : "xl:w-1/2";
@@ -558,8 +542,7 @@
         if (currentView == ViewState.Summary || currentView == ViewState.ReviewGrid) return 100;
         return tasks.Any() ? (currentTaskIndex * 100) / tasks.Count : 0;
     }
-
-    // --- Interakce odstraněny z inline HTML k zamezení Razor "div" chyb ---
+    
     private void SelectMultipleChoice(string label) {
         if (!CurrentTask.IsEvaluated) CurrentTask.UserAnswer = label;
     }

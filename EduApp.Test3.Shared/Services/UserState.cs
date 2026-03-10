@@ -17,7 +17,7 @@ public class UserState
 
     public bool IsLoggedIn { get; private set; } = false;
     
-    public bool IsAdmin => Email == "admin@test.pro";
+    public bool IsAdmin => Email == "b3inapp@gmail.com";
     
     public string UserName { get; private set; } = "";
     public string Email { get; private set; } = "";
@@ -35,8 +35,7 @@ public class UserState
     public event Action<int>? OnLevelUp;
 
     private int GetXpForLevel(int level) => (level - 1) * level * 50;
-
-    // Bezpečné hashování hesla (SHA-256)
+    
     private string HashPassword(string password)
     {
         using var sha256 = SHA256.Create();
@@ -45,7 +44,6 @@ public class UserState
         return Convert.ToBase64String(hash);
     }
 
-    // Explicitně specifikujeme "public.users" pro PostgreSQL
     private async Task EnsureUsersTableAsync(NpgsqlConnection conn)
     {
         await conn.ExecuteAsync(@"
@@ -61,7 +59,6 @@ public class UserState
         try { await conn.ExecuteAsync("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password_hash TEXT;"); } catch { }
     }
 
-    // Nyní vracíme Tuple s chybovou zprávou, abychom viděli přesný problém
     public async Task<(bool Success, string ErrorMessage)> AuthenticateAsync(string email, string password)
     {
         try
@@ -89,9 +86,13 @@ public class UserState
             }
             return (false, "Nesprávný e-mail nebo heslo.");
         }
+        catch (PostgresException ex) when (ex.SqlState == "28P01" || ex.SqlState == "3D000" || ex.SqlState == "28000")
+        {
+            return (false, "Kritická chyba: Špatné jméno/heslo nebo název databáze v appsettings.json!");
+        }
         catch (Exception ex) 
         { 
-            return (false, $"Chyba DB: {ex.Message}"); // Tady zachytíme, co vadí Postgresu
+            return (false, $"Chyba spojení s databází: {ex.Message}");
         }
     }
 
@@ -103,7 +104,6 @@ public class UserState
             using var connection = new NpgsqlConnection(connString);
             await EnsureUsersTableAsync(connection);
 
-            // Bezpečnější kontrola přes COUNT
             var exists = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM public.users WHERE email = @Email", new { Email = email });
             if (exists > 0) return (false, "Účet s tímto e-mailem již existuje.");
 
@@ -121,9 +121,13 @@ public class UserState
             NotifyStateChanged();
             return (true, "");
         }
+        catch (PostgresException ex) when (ex.SqlState == "28P01" || ex.SqlState == "3D000" || ex.SqlState == "28000")
+        {
+            return (false, "Kritická chyba: Špatné jméno/heslo nebo název databáze v appsettings.json!");
+        }
         catch (Exception ex) 
         { 
-            return (false, $"Chyba DB: {ex.Message}"); // Tady zachytíme, co vadí Postgresu
+            return (false, $"Chyba spojení s databází: {ex.Message}");
         }
     }
 

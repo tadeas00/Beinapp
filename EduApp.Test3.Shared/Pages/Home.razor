@@ -4,7 +4,6 @@
 
 <div class="max-w-7xl mx-auto space-y-10 pb-20 relative animate-fade-in">
     
-    <!-- Bento Grid - Statistiky a uvítání -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[180px]">
         <div class="md:col-span-2 md:row-span-2 glass-card rounded-[40px] p-10 flex flex-col justify-between relative overflow-hidden group shadow-2xl border-indigo-200 dark:border-indigo-500/20 shadow-indigo-500/5">
             <div class="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-110 transition-all duration-700">
@@ -39,12 +38,10 @@
              <h4 class="text-slate-900 dark:text-white font-bold text-sm uppercase leading-tight">Plán</h4>
         </div>
     </div>
-
-    <!-- Sekce Předměty -->
+    
     <section class="space-y-6">
         <h3 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter px-2">Vyber si předmět</h3>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Speciální Český jazyk (Volá Layout) -->
             <button @onclick='() => Layout.StartExamSelectionCZ()' class="subject-btn group border-red-200 dark:border-red-500/20 hover:border-red-400 dark:hover:border-red-500/50 relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 w-16 h-16 bg-red-200 dark:bg-red-500/10 rounded-full blur-xl group-hover:bg-red-300 dark:group-hover:bg-red-500/20 transition"></div>
                 <div class="subject-icon bg-red-100 dark:bg-red-500/10 text-red-500 dark:text-red-400 relative z-10"><i class="ph ph-books"></i></div>

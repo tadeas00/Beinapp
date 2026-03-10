@@ -43,8 +43,7 @@
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-white/5"></div></div>
             <span class="relative bg-slate-50 dark:bg-slate-950 px-4 text-[10px] font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest">Nebo se přihlaš přes</span>
         </div>
-
-        <!-- Sociální přihlášení (Zatím vizuální) -->
+        
         <div class="grid grid-cols-2 gap-3">
             <button @onclick='() => ShowSocialError("Google")' disabled="@isLoading" class="social-btn flex items-center justify-center gap-2 py-3 rounded-xl transition text-[10px] font-bold uppercase tracking-widest active:scale-95">
                 <i class="ph ph-google-logo text-lg text-red-500 dark:text-red-400"></i> Google
@@ -109,7 +108,7 @@
         } 
         else 
         {
-            errorMessage = result.ErrorMessage; // Ukáže přesnou chybovou hlášku
+            errorMessage = result.ErrorMessage;
         }
     }
 

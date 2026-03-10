@@ -10,7 +10,6 @@
 
 <div class="@ThemeClass">
     <div class="page font-outfit min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
-        <!-- Globální pozadí s gradienty a texturou -->
         <div class="fixed inset-0 z-0 pointer-events-none">
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 dark:opacity-20 transition-opacity duration-500"></div>
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400/30 dark:bg-indigo-600/20 blur-[120px] rounded-full transition-colors duration-500"></div>
@@ -20,8 +19,7 @@
         @if (UserState.IsLoggedIn)
         {
             <div class="relative z-10 flex flex-col md:flex-row min-h-screen animate-fade-in">
-
-                <!-- Mobilní Header -->
+                
                 <header class="md:hidden flex items-center justify-between p-4 glass-nav sticky top-0 z-50">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -33,8 +31,7 @@
                         <i class="ph @(isNavOpen ? "ph-x" : "ph-list")"></i>
                     </button>
                 </header>
-
-                <!-- Sidebar -->
+                
                 <aside class="@(isNavOpen ? "translate-x-0" : "-translate-x-full") md:translate-x-0 fixed md:sticky top-0 left-0 h-screen w-72 glass-sidebar p-6 flex flex-col transition-transform duration-300 z-40">
                     <div class="hidden md:flex items-center gap-3 mb-12 px-2">
                         <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-xl">
@@ -87,8 +84,7 @@
                             </NavLink>
                         }
                     </nav>
-
-                    <!-- Spodní panel (Téma + Profil + XP) -->
+                    
                     <div class="mt-auto pt-6 border-t border-slate-200 dark:border-white/5 space-y-4">
                         <button @onclick="ToggleTheme" class="theme-toggle-btn flex items-center justify-between w-full px-4 py-3 rounded-2xl transition">
                             <span class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest">Režim</span>
@@ -117,7 +113,6 @@
                                 </button>
                             </div>
                             
-                            <!-- XP Progress -->
                             <div class="w-full space-y-1">
                                 <div class="flex justify-between text-[8px] font-bold uppercase tracking-widest text-slate-500">
                                     <span>XP: @UserState.Xp</span>
@@ -130,8 +125,7 @@
                         </div>
                     </div>
                 </aside>
-
-                <!-- Hlavní obsahová oblast s kaskádovým předáním Layoutu -->
+                
                 <main class="flex-grow p-5 md:p-12 overflow-y-auto w-full">
                     <CascadingValue Value="this">
                         @Body
@@ -143,8 +137,7 @@
             {
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 md:hidden" @onclick="ToggleNav"></div>
             }
-
-            <!-- Oslava nového levelu modál -->
+            
             @if (showLevelUpModal)
             {
                 <div class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in" @onclick="CloseLevelUpModal">
@@ -156,8 +149,7 @@
                     </div>
                 </div>
             }
-
-            <!-- UNIVERZÁLNÍ MODÁL -->
+            
             @if (isModalOpen) {
                 <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-fade-in">
                     <div class="glass-card max-w-xl w-full rounded-[40px] p-8 border border-white/10 shadow-2xl relative bounce-in">
@@ -316,7 +308,6 @@
     .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,0,0,0.05); }
     .dark .glass-nav { background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
     
-    /* Sdílené prvky pro Sidebar */
     .theme-toggle-btn { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .dark .theme-toggle-btn { background: rgba(255,255,255,0.05); border-color: transparent; box-shadow: none; }
     .theme-toggle-btn:hover { background: #f8fafc; }
@@ -338,7 +329,6 @@
     .dark .nav-item.active { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.2); box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.05); color: #818cf8; }
     .nav-item i { font-size: 20px; }
     
-    /* Styly zkopírované z Modalu (původně v Home) */
     .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.05); }
     .dark .glass-card { background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); }
     
@@ -395,8 +385,7 @@
     private bool isNavOpen = false;
     private bool isDarkMode = true; 
     private string ThemeClass => isDarkMode ? "dark" : "";
-
-    // MODÁLNÍ LOGIKA
+    
     public bool isModalOpen = false;
     public int modalStep = 1; 
     public string selectedSubject = "";
@@ -404,8 +393,7 @@
     public string selectedMode = "";
     public int questionLimit = 10;
     public List<string> availableTopics = new();
-
-    // LEVEL UP MODÁL LOGIKA
+    
     private bool showLevelUpModal = false;
     private int newLevelToShow = 0;
 
@@ -464,8 +452,7 @@
         UserState.Logout();
         Navigation.NavigateTo("/login");
     }
-
-    // VEŘEJNÉ METODY PRO MODAL (aby na ně dosáhl Home.razor přes CascadingParameter)
+    
     public async Task StartSelection(string subject) {
         selectedSubject = subject; 
         modalStep = 1; 

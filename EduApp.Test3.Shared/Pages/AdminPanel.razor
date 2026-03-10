@@ -296,8 +296,7 @@
     private Tab currentTab = Tab.Questions;
     private bool isSaving = false;
     private string statusMessage = "";
-
-    // MODELY
+    
     public class QuestionDto {
         public string Subject { get; set; } = "";
         public string Topic { get; set; } = "";
@@ -341,8 +340,7 @@
         await LoadSettings();
         await LoadUsers();
     }
-
-    // -- LOGIKA PRO OTÁZKY --
+    
     private async Task SaveQuestion()
     {
         if (string.IsNullOrWhiteSpace(newQuestion.Subject) || string.IsNullOrWhiteSpace(newQuestion.QuestionText) || string.IsNullOrWhiteSpace(newQuestion.CorrectOption))
@@ -364,7 +362,6 @@
             
             statusMessage = "Otázka úspěšně uložena!";
             
-            // Vyčistíme pole, ale necháme Předmět a Téma pro rychlé přidávání dalších
             newQuestion.QuestionText = "";
             newQuestion.OptionA = "";
             newQuestion.OptionB = "";
@@ -380,8 +377,7 @@
     }
 
     private void ClearForm() => newQuestion = new QuestionDto();
-
-    // -- LOGIKA PRO UŽIVATELE --
+    
     private async Task LoadUsers()
     {
         var connString = Configuration.GetConnectionString("MyDb");
@@ -403,8 +399,7 @@
         await LoadUsers();
         userToEdit = null;
     }
-
-    // -- LOGIKA PRO NASTAVENÍ --
+    
     private async Task LoadSettings()
     {
         settings.XpQuiz = await UserState.GetXpRewardAsync("xp_quiz", 10);
