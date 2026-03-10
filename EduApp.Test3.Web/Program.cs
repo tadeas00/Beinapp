@@ -2,9 +2,9 @@ using System;
 using EduApp.Test3.Web.Components;
 using EduApp.Test3.Shared.Services;
 using EduApp.Test3.Web.Services;
-using Resend; // 1. Přidat tento using
-using Npgsql; // Pro databázi
-using Dapper; // Pro jednodušší dotazy
+using Resend; 
+using Npgsql; 
+using Dapper; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,29 +15,28 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddScoped<UserState>();
-builder.Services.AddSingleton<EduApp.Test3.Shared.Services.ExamRepository>();
+builder.Services.AddSingleton<ExamRepository>();
 
-// 2. Registrace Resend služby
+// 2. Registrace Resend služby (Opraveno pro správnou funkčnost)
 var resendApiKey = builder.Configuration["Resend:ApiKey"] 
                    ?? Environment.GetEnvironmentVariable("Resend__ApiKey") 
                    ?? ""; 
 
 builder.Services.AddOptions();
-builder.Services.AddHttpClient<IResend, ResendClient>();
 builder.Services.Configure<ResendClientOptions>(options =>
 {
     options.ApiToken = resendApiKey;
 });
-builder.Services.AddTransient<IResend, ResendClient>();
+// AddHttpClient automaticky zaregistruje IResend, není potřeba přidávat AddTransient
+builder.Services.AddHttpClient<IResend, ResendClient>();
 
 // 3. Registrace tvé Emailové služby
 builder.Services.AddTransient<IEmailService, EmailService>();
 
-// 4. Registrace DB spojení (předpokládám, že máš v Secrets ConnectionString)
+// 4. Registrace DB spojení (Sladěno s appsettings.json -> "MyDb")
 builder.Services.AddScoped(sp => 
-    new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")));
-
+    new NpgsqlConnection(builder.Configuration.GetConnectionString("MyDb") 
+                         ?? Environment.GetEnvironmentVariable("ConnectionStrings__MyDb")));
 
 var app = builder.Build();
 
@@ -54,24 +53,10 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.MapStaticAssets();
 
-// 5. Tvůj nový registrační endpoint
-app.MapPost("/api/register", async (RegisterRequest model, NpgsqlConnection db, IEmailService emailService) =>
-{
-    // Uložení do DB
-    const string sql = "INSERT INTO public.users (email, username) VALUES (@Email, @Username)";
-    await db.ExecuteAsync(sql, new { model.Email, model.Username });
-
-    // Odeslání mailu
-    await emailService.SendRegistrationEmailAsync(model.Email, model.Username);
-
-    return Results.Ok("Registrace a mail OK!");
-});
+// Zastaralý a chybový endpoint /api/register byl smazán. 
+// Registraci nyní plně a bezpečně řeší přímo komponenta Register.razor!
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies(typeof(EduApp.Test3.Shared._Imports).Assembly);
+    .AddInteractiveServerRenderMode();
 
 app.Run();
-
-// Jednoduchý model pro endpoint
-public record RegisterRequest(string Email, string Username);

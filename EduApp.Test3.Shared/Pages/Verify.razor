@@ -1,0 +1,88 @@
+@page "/verify"
+@layout AuthLayout
+@inject NavigationManager Navigation
+@inject UserState UserState
+
+<div class="w-full max-w-md p-4 animate-fade-in relative z-10 text-center">
+    <div class="glass-card rounded-[40px] p-10 shadow-2xl relative overflow-hidden">
+        
+        @if (isVerifying)
+        {
+            <div class="w-20 h-20 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner animate-pulse">
+                <i class="ph ph-spinner animate-spin text-4xl text-indigo-600 dark:text-indigo-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Ověřuji...</h2>
+            <p class="text-slate-500 text-sm">Prosím počkej, ověřujeme tvůj odkaz.</p>
+        }
+        else if (isSuccess)
+        {
+            <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner bounce-in">
+                <i class="ph ph-check-circle text-4xl text-emerald-600 dark:text-emerald-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Úspěch!</h2>
+            <p class="text-slate-500 text-sm mb-8">Tvůj účet byl úspěšně ověřen a jsi přihlášen.</p>
+            
+            <button @onclick='() => Navigation.NavigateTo("/")' class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl uppercase tracking-widest text-xs transition shadow-lg shadow-emerald-500/30 active:scale-95 flex items-center justify-center gap-2">
+                Přejít do aplikace <i class="ph ph-arrow-right"></i>
+            </button>
+        }
+        else
+        {
+            <div class="w-20 h-20 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <i class="ph ph-warning-circle text-4xl text-red-600 dark:text-red-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Jejda!</h2>
+            <p class="text-slate-500 text-sm mb-6">@errorMessage</p>
+            
+            <button @onclick='() => Navigation.NavigateTo("/login")' class="w-full bg-slate-800 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl uppercase tracking-widest text-xs transition shadow-lg hover:bg-slate-700 dark:hover:bg-slate-200 active:scale-95">
+                Zpět na přihlášení
+            </button>
+        }
+
+    </div>
+</div>
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.05); }
+    .dark .glass-card { background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+    @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @@keyframes bounceIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Email { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Code { get; set; }
+
+    private bool isVerifying = true;
+    private bool isSuccess = false;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Code))
+        {
+            isVerifying = false;
+            errorMessage = "Odkaz je neplatný nebo poškozený.";
+            return;
+        }
+
+        var result = await UserState.VerifyAccountAsync(Email, Code);
+        
+        isVerifying = false;
+        if (result.Success)
+        {
+            isSuccess = true;
+            // Necháme uživatele chvíli pokochat úspěchem, pak ho můžeme případně přesměrovat sami
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+}
