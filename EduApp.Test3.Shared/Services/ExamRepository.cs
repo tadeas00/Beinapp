@@ -37,7 +37,7 @@ namespace EduApp.Test3.Shared.Services
         {
             if (testId == "Didaktický test 2025 - 1. řádný termín") return GetC9A2025();
             if (testId == "Didaktický test 2025 - 2. řádný termín") return GetC9B2025();
-            if (testId == "Didaktický test 2025 – 1. náhradní termín") return GetC9C2025();
+            if (testId == "Didaktický test 2025 - 1. náhradní termín") return GetC9C2025();
             if (testId == "Didaktický test 2025 - 2. náhradní termín") return GetC9D2025();
             if (testId == "M25-PODZIM") return GetMaturita2025Podzim();
             return new List<CermatTask>();
