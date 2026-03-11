@@ -143,7 +143,6 @@
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 md:hidden" @onclick="ToggleNav"></div>
             }
 
-            <!-- Oslava nového levelu modál -->
             @if (showLevelUpModal)
             {
                 <div class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in" @onclick="CloseLevelUpModal">
@@ -156,7 +155,6 @@
                 </div>
             }
 
-            <!-- UNIVERZÁLNÍ MODÁL -->
             @if (isModalOpen) {
                 <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-fade-in">
                     <div class="glass-card max-w-xl w-full rounded-[40px] p-8 border border-white/10 shadow-2xl relative bounce-in">
@@ -165,7 +163,6 @@
                             <i class="ph ph-x text-xl"></i>
                         </button>
 
-                        <!-- STANDARDNÍ UČENÍ (Kroky 1-3) -->
                         @if (modalStep == 1) {
                             <div class="mb-8 pr-12">
                                 <span class="text-indigo-500 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Krok 1/3 • @selectedSubject</span>
@@ -277,65 +274,41 @@
                             </div>
 
                             <div class="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                @if (selectedExamLevel == "Přijímačky") {
-                                    <button @onclick='() => StartExam($"Didaktický test {selectedExamYear} - 1. řádný termín")' class="test-btn active-test group flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Didaktický test @selectedExamYear - 1. řádný termín</h4>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">1. řádný termín • 30 úloh • 50 bodů</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
-                                            <i class="ph ph-play-fill text-xl text-white"></i>
-                                        </div>
-                                    </button>
+                                @{
+                                    var examsToRender = new List<(string Id, string Sub)>();
+                                    if (selectedExamLevel == "Přijímačky") {
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 1. řádný termín", "1. řádný termín • 30 úloh • 50 bodů"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 2. řádný termín", "2. řádný termín • 30 úloh • 50 bodů"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 1. náhradní termín", "1. náhradní termín • 30 úloh • 50 bodů"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 2. náhradní termín", "2. náhradní termín • 30 úloh • 50 bodů"));
+                                    } else {
+                                        string shortYear = selectedExamYear.ToString().Substring(2);
+                                        examsToRender.Add(($"M{shortYear}-JARO", "Didaktický test • Kompletní simulace"));
+                                        examsToRender.Add(($"M{shortYear}-PODZIM", "Náhradní/Opravný termín • Kompletní simulace"));
+                                    }
+                                }
 
-                                    <button @onclick='() => StartExam($"Didaktický test {selectedExamYear} - 2. řádný termín")' class="test-btn active-test group flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Didaktický test @selectedExamYear - 2. řádný termín</h4>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">2. řádný termín • 30 úloh • 50 bodů</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
-                                            <i class="ph ph-play-fill text-xl text-white"></i>
-                                        </div>
-                                    </button>
+                                @foreach (var exam in examsToRender) {
+                                    int score = userExamScores.TryGetValue(exam.Id, out var s) ? s : 0;
+                                    bool isPassed = score >= 30; // 30+ bodů je zelená
+                                    bool isAttempted = score > 0; // zkoušeno, ale nepokořena hranice je žlutá/oranžová
                                     
-                                    <button @onclick='() => StartExam($"Didaktický test {selectedExamYear} - 1. náhradní termín")' class="test-btn active-test group flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Didaktický test @selectedExamYear - 1. náhradní termín</h4>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">1. náhradní termín • 30 úloh • 50 bodů</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
-                                            <i class="ph ph-play-fill text-xl text-white"></i>
-                                        </div>
-                                    </button>
-
-                                    <button @onclick='() => StartExam($"Didaktický test {selectedExamYear} - 2. náhradní termín")' class="test-btn active-test group flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Didaktický test @selectedExamYear - 2. náhradní termín</h4>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">2. náhradní termín • 30 úloh • 50 bodů</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
-                                            <i class="ph ph-play-fill text-xl text-white"></i>
-                                        </div>
-                                    </button>
-                                } else {
-                                    string shortYear = selectedExamYear.ToString().Substring(2);
-                                    <button @onclick='() => StartExam($"M{shortYear}-JARO")' class="test-btn active-test group flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Jarní termín (@selectedExamYear)</h4>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Didaktický test • Kompletní simulace</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
-                                            <i class="ph ph-play-fill text-xl text-white"></i>
-                                        </div>
-                                    </button>
+                                    string circleClass = isPassed ? "bg-emerald-500 shadow-emerald-500/40" : 
+                                                         isAttempted ? "bg-amber-500 shadow-amber-500/40" : 
+                                                         "bg-rose-500 shadow-rose-500/40";
                                     
-                                    <button @onclick='() => StartExam($"M{shortYear}-PODZIM")' class="test-btn active-test group flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Podzimní termín (@selectedExamYear)</h4>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Náhradní/Opravný termín • Kompletní simulace</p>
+                                    <button @onclick='() => StartExam(exam.Id)' class="test-btn active-test group flex items-center justify-between">
+                                        <div class="text-left">
+                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">@exam.Id</h4>
+                                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">@exam.Sub</p>
                                         </div>
-                                        <div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/40 group-hover:scale-110 transition">
-                                            <i class="ph ph-play-fill text-xl text-white"></i>
+                                        <div class="w-14 h-14 rounded-full @circleClass flex flex-col items-center justify-center shadow-lg group-hover:scale-110 transition shrink-0 ml-4">
+                                            @if (isAttempted) {
+                                                <span class="text-white font-black text-lg leading-none">@score</span>
+                                                <span class="text-white/80 text-[8px] font-bold uppercase tracking-widest mt-0.5">z 50</span>
+                                            } else {
+                                                <i class="ph ph-play-fill text-xl text-white"></i>
+                                            }
                                         </div>
                                     </button>
                                 }
@@ -410,7 +383,6 @@
     .level-btn:hover { border-color: rgba(251, 113, 133, 0.4); background: rgba(255, 241, 242, 0.8); transform: translateY(-2px); }
     .dark .level-btn:hover { border-color: rgba(244, 63, 94, 0.5); background: rgba(30, 41, 59, 0.6); }
 
-    /* Nový styl pro výběr roku */
     .year-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .dark .year-btn { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: none; }
     .year-btn:hover { border-color: rgba(251, 113, 133, 0.4); background: rgba(255, 241, 242, 0.8); transform: translateY(-2px); }
@@ -452,9 +424,12 @@
     public int questionLimit = 10;
     public List<string> availableTopics = new();
 
-    // Logika pro zkoušky
+    // Logika pro zkoušky a jejich skóre
     public string selectedExamLevel = "";
     public int selectedExamYear = 2025;
+    
+    // NOVÉ: Drží nejvyšší skóre uživatele pro každý test
+    private Dictionary<string, int> userExamScores = new();
 
     // LEVEL UP MODÁL LOGIKA
     private bool showLevelUpModal = false;
@@ -516,7 +491,6 @@
         Navigation.NavigateTo("/login");
     }
 
-    // VEŘEJNÉ METODY PRO MODAL UČENÍ (pro Home.razor atd.)
     public async Task StartSelection(string subject) {
         selectedSubject = subject; 
         modalStep = 1; 
@@ -531,33 +505,31 @@
         StateHasChanged();
     }
 
-    // VEŘEJNÉ METODY PRO ZKOUŠKY
     public void StartExamSelection(string subject) {
         selectedSubject = subject;
-        modalStep = 9; // Krok 9 = Výběr úrovně (Maturita/Přijímačky)
+        modalStep = 9;
         isModalOpen = true;
         StateHasChanged();
     }
 
-    // Zachováváme staré metody pro zpětnou kompatibilitu s tlačítky z Home.razor
     public void StartExamSelectionCZ() => StartExamSelection("Český jazyk");
     public void StartExamSelectionAJ() => StartExamSelection("Anglický jazyk");
     public void StartExamSelectionMAT() => StartExamSelection("Matematika");
 
     public void SetExamLevel(string level) {
         selectedExamLevel = level;
-        modalStep = 10; // Krok 10 = Výběr roku
+        modalStep = 10;
         StateHasChanged();
     }
 
-    public void SetExamYear(int year) {
+    public async Task SetExamYear(int year) {
         selectedExamYear = year;
-        modalStep = 11; // Krok 11 = Výběr sady
+        userExamScores = await UserState.GetUserExamScoresAsync();
+        modalStep = 11;
         StateHasChanged();
     }
 
     public void StartExam(string testId) {
-        // Převedení celého jména na zkratku pro URL
         string subjCode = selectedSubject switch {
             "Český jazyk" => "cj",
             "Anglický jazyk" => "aj",
@@ -569,7 +541,7 @@
         Navigation.NavigateTo($"/exam/{subjCode}/{testId}");
     }
 
-    // Obecné přepínání pro Kvízy a Psaní
+
     public void SelectTopic(string topic) { selectedTopic = topic; modalStep = 2; StateHasChanged(); }
     public void SelectMode(string mode) { selectedMode = mode; modalStep = 3; StateHasChanged(); }
     

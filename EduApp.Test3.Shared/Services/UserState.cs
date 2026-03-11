@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Dapper;
 using System.Security.Cryptography;
 using System.Text;
+using System.Collections.Generic;
 
 public class UserState
 {
@@ -56,10 +57,17 @@ public class UserState
                 streak INTEGER DEFAULT 0
             )");
         
-        // Přidáme sloupce pro ověření e-mailu (pokud ještě neexistují)
         try { await conn.ExecuteAsync("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password_hash TEXT;"); } catch { }
         try { await conn.ExecuteAsync("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT TRUE;"); } catch { }
         try { await conn.ExecuteAsync("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS verification_code TEXT;"); } catch { }
+
+        await conn.ExecuteAsync(@"
+            CREATE TABLE IF NOT EXISTS public.user_exams (
+                email TEXT,
+                test_id TEXT,
+                highest_score INTEGER DEFAULT 0,
+                PRIMARY KEY (email, test_id)
+            )");
     }
 
     public async Task<(bool Success, string ErrorMessage)> AuthenticateAsync(string email, string password)
@@ -97,7 +105,6 @@ public class UserState
         catch (Exception ex) { return (false, $"Chyba DB: {ex.Message}"); }
     }
 
-    // Registrace nyní uloží uživatele jako NEOVĚŘENÉHO s kódem
     public async Task<(bool Success, string ErrorMessage)> RegisterPendingUserAsync(string username, string email, string password, string verificationCode)
     {
         try
@@ -111,7 +118,6 @@ public class UserState
 
             var hash = HashPassword(password);
             
-            // Uložíme uživatele, ale is_verified je false
             await connection.ExecuteAsync(
                 "INSERT INTO public.users (email, username, password_hash, xp, level, streak, is_verified, verification_code) VALUES (@Email, @UserName, @Hash, 0, 1, 0, FALSE, @Code)",
                 new { Email = email, UserName = username, Hash = hash, Code = verificationCode });
@@ -121,7 +127,6 @@ public class UserState
         catch (Exception ex) { return (false, $"Chyba DB: {ex.Message}"); }
     }
 
-    // Nová metoda pro ověření kódu z e-mailu
     public async Task<(bool Success, string ErrorMessage)> VerifyAccountAsync(string email, string code)
     {
         try
@@ -137,12 +142,10 @@ public class UserState
             if (user.is_verified == true) return (false, "Účet již byl ověřen. Můžeš se přihlásit.");
             if (user.verification_code != code.Trim()) return (false, "Nesprávný ověřovací kód.");
 
-            // Kód souhlasí -> Ověříme účet
             await connection.ExecuteAsync(
                 "UPDATE public.users SET is_verified = TRUE, verification_code = NULL WHERE email = @Email", 
                 new { Email = email });
 
-            // Rovnou přihlásíme
             IsLoggedIn = true;
             Email = email;
             UserName = user.username;
@@ -207,6 +210,44 @@ public class UserState
             return defaultValue;
         }
         catch { return defaultValue; }
+    }
+
+    public async Task SaveExamScoreAsync(string testId, int score)
+    {
+        if (!IsLoggedIn) return;
+        try
+        {
+            var connString = _config.GetConnectionString("MyDb");
+            using var connection = new NpgsqlConnection(connString);
+            
+            await connection.ExecuteAsync(@"
+                INSERT INTO public.user_exams (email, test_id, highest_score)
+                VALUES (@Email, @TestId, @Score)
+                ON CONFLICT (email, test_id) 
+                DO UPDATE SET highest_score = GREATEST(public.user_exams.highest_score, EXCLUDED.highest_score)",
+                new { Email, TestId = testId, Score = score });
+        }
+        catch { }
+    }
+
+    public async Task<Dictionary<string, int>> GetUserExamScoresAsync()
+    {
+        if (!IsLoggedIn) return new Dictionary<string, int>();
+        try
+        {
+            var connString = _config.GetConnectionString("MyDb");
+            using var connection = new NpgsqlConnection(connString);
+            var results = await connection.QueryAsync<dynamic>(
+                "SELECT test_id, highest_score FROM public.user_exams WHERE email = @Email",
+                new { Email });
+            
+            var dict = new Dictionary<string, int>();
+            foreach (var row in results) {
+                dict[(string)row.test_id] = (int)row.highest_score;
+            }
+            return dict;
+        }
+        catch { return new Dictionary<string, int>(); }
     }
 
     private void NotifyStateChanged() => OnChange?.Invoke();

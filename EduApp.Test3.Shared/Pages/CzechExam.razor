@@ -659,6 +659,8 @@
             int xpPerPoint = await UserState.GetXpRewardAsync("xp_exam", 5);
             xpEarned = totalScore * xpPerPoint;
             await UserState.AddXpAsync(xpEarned);
+
+            await UserState.SaveExamScoreAsync(TestId, totalScore);
         }
     }
 
