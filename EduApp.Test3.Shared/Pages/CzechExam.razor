@@ -1,5 +1,7 @@
 @page "/exam/cj/{TestId}"
+@implements IDisposable
 @using EduApp.Test3.Shared.Services
+@using System.Timers
 @inject NavigationManager Navigation
 @inject ExamRepository ExamRepo
 @inject UserState UserState
@@ -30,6 +32,17 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
+            
+            <!-- NOVÉ: Časomíra (Pokud je limit > 0 a jsme v zobrazení testu) -->
+            @if (TimeLimit > 0 && currentView == ViewState.Exam) {
+                <div class="flex flex-col text-right mr-2 md:mr-4 border-r border-slate-200 dark:border-white/10 pr-4 md:pr-6">
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Zbývá čas</span>
+                    <span class="text-lg md:text-xl font-bold @(timeRemainingSeconds < 300 ? "text-rose-500 animate-pulse" : "text-slate-900 dark:text-white")">
+                        @GetFormattedTime()
+                    </span>
+                </div>
+            }
+
             <div class="flex flex-col text-right">
                 <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Skóre</span>
                 <span class="text-xl font-bold text-slate-900 dark:text-white">@totalScore <span class="text-slate-400 dark:text-slate-600">/ @maxPossibleScore</span></span>
@@ -339,8 +352,12 @@
             }
             else if (currentView == ViewState.Summary)
             {
-                <div class="glass-card max-w-2xl mx-auto rounded-[40px] p-8 md:p-12 text-center shadow-2xl bounce-in mt-10">
-                    <div class="w-24 h-24 bg-rose-100 dark:bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(244,63,94,0.1)] dark:shadow-[0_0_30px_rgba(244,63,94,0.2)]">
+                <div class="glass-card max-w-2xl mx-auto rounded-[40px] p-8 md:p-12 text-center shadow-2xl bounce-in mt-10 relative overflow-hidden">
+                    @if (TimeLimit > 0 && timeRemainingSeconds <= 0) {
+                        <div class="absolute top-0 left-0 w-full bg-rose-500 text-white py-1 text-[10px] font-bold uppercase tracking-widest animate-pulse">Čas vypršel</div>
+                    }
+                    
+                    <div class="w-24 h-24 bg-rose-100 dark:bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(244,63,94,0.1)] dark:shadow-[0_0_30px_rgba(244,63,94,0.2)] mt-4">
                         <i class="ph ph-trophy text-6xl text-rose-500"></i>
                     </div>
                     <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 tracking-tighter uppercase font-playfair italic">Test Dokončen</h2>
@@ -522,6 +539,8 @@
 
 @code {
     [Parameter] public string TestId { get; set; } = "";
+    
+    [SupplyParameterFromQuery] public int TimeLimit { get; set; }
 
     private enum ViewState { Exam, Summary, ReviewGrid, ReviewTask }
     
@@ -531,6 +550,9 @@
     private int xpEarned = 0;
     private int maxPossibleScore = 0;
     private ViewState currentView = ViewState.Exam;
+    
+    private Timer? examTimer;
+    private int timeRemainingSeconds;
 
     private CermatTask CurrentTask => tasks.ElementAtOrDefault(currentTaskIndex);
     
@@ -541,6 +563,11 @@
     private int GetProgressBarWidth() {
         if (currentView == ViewState.Summary || currentView == ViewState.ReviewGrid) return 100;
         return tasks.Any() ? (currentTaskIndex * 100) / tasks.Count : 0;
+    }
+
+    private string GetFormattedTime() {
+        TimeSpan t = TimeSpan.FromSeconds(timeRemainingSeconds);
+        return t.ToString(@"mm\:ss");
     }
     
     private void SelectMultipleChoice(string label) {
@@ -582,6 +609,38 @@
         }
 
         maxPossibleScore = tasks.Sum(t => t.MaxPoints);
+
+        // Zapnutí časomíry
+        if (TimeLimit > 0) {
+            timeRemainingSeconds = TimeLimit * 60;
+            examTimer = new Timer(1000);
+            examTimer.Elapsed += OnTimerTick;
+            examTimer.Start();
+        }
+    }
+    
+    private void OnTimerTick(object? sender, ElapsedEventArgs e)
+    {
+        if (timeRemainingSeconds > 0) {
+            timeRemainingSeconds--;
+            InvokeAsync(StateHasChanged);
+        } else {
+            examTimer?.Stop();
+            InvokeAsync(ForceEndExam);
+        }
+    }
+    
+    private async Task ForceEndExam()
+    {
+        if (currentView == ViewState.Exam)
+        {
+            if (CurrentTask != null && !CurrentTask.IsEvaluated) {
+                EvaluateTask();
+            }
+            
+            await FinishExamSequence();
+            StateHasChanged();
+        }
     }
 
     private void EvaluateTask()
@@ -652,16 +711,23 @@
 
     private async Task NextTask()
     {
-        if (currentTaskIndex < tasks.Count - 1) currentTaskIndex++;
-        else {
-            currentView = ViewState.Summary;
-            
-            int xpPerPoint = await UserState.GetXpRewardAsync("xp_exam", 5);
-            xpEarned = totalScore * xpPerPoint;
-            await UserState.AddXpAsync(xpEarned);
-
-            await UserState.SaveExamScoreAsync(TestId, totalScore);
+        if (currentTaskIndex < tasks.Count - 1) {
+            currentTaskIndex++;
+        } else {
+            examTimer?.Stop(); 
+            await FinishExamSequence();
         }
+    }
+    
+    private async Task FinishExamSequence()
+    {
+        currentView = ViewState.Summary;
+        
+        int xpPerPoint = await UserState.GetXpRewardAsync("xp_exam", 5);
+        xpEarned = totalScore * xpPerPoint;
+        await UserState.AddXpAsync(xpEarned);
+
+        await UserState.SaveExamScoreAsync(TestId, totalScore);
     }
 
     private void GoToReviewTask(int index)
@@ -675,5 +741,10 @@
         if (currentView == ViewState.ReviewTask) currentView = ViewState.ReviewGrid;
         else if (currentView == ViewState.ReviewGrid) currentView = ViewState.Summary;
         else Navigation.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        examTimer?.Dispose();
     }
 }

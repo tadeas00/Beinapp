@@ -56,13 +56,25 @@
                             <span>Můj Progres</span>
                         </NavLink>
 
-                        <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Knihovna</div>
+                        <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Příprava na zkoušky</div>
 
-                        <button @onclick='() => { StartExamSelection("Český jazyk"); CloseNav(); }' class="nav-item w-full text-left text-rose-600 dark:text-rose-300 border-rose-500/10 hover:border-rose-500/30">
+                        <button @onclick='() => { StartExamSelectionCZ(); CloseNav(); }' class="nav-item w-full text-left text-rose-600 dark:text-rose-300 border-rose-500/10 hover:border-rose-500/30">
                             <i class="ph ph-books text-rose-500 dark:text-rose-400"></i>
                             <span>Český jazyk</span>
                         </button>
                         
+                        <button @onclick='() => { StartExamSelectionAJ(); CloseNav(); }' class="nav-item w-full text-left text-sky-600 dark:text-sky-300 border-sky-500/10 hover:border-sky-500/30">
+                            <i class="ph ph-chat-circle-text text-sky-500 dark:text-sky-400"></i>
+                            <span>Anglický jazyk</span>
+                        </button>
+                        
+                        <button @onclick='() => { StartExamSelectionMAT(); CloseNav(); }' class="nav-item w-full text-left text-blue-600 dark:text-blue-300 border-blue-500/10 hover:border-blue-500/30">
+                            <i class="ph ph-calculator text-blue-500 dark:text-blue-400"></i>
+                            <span>Matematika</span>
+                        </button>
+
+                        <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Přírodní vědy</div>
+
                         <button @onclick='async () => { await StartSelection("Biologie"); CloseNav(); }' class="nav-item w-full text-left text-emerald-600 dark:text-emerald-300 border-emerald-500/10 hover:border-emerald-500/30">
                             <i class="ph ph-dna text-emerald-500 dark:text-emerald-400"></i>
                             <span>Biologie</span>
@@ -224,21 +236,23 @@
                         
                         else if (modalStep == 9) {
                             <div class="mb-8">
-                                <span class="bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-200 dark:border-rose-500/30 mb-4 inline-block">@selectedSubject</span>
+                                <span class="@CurrentTheme.BgLight @CurrentTheme.TextDark px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border @CurrentTheme.Border mb-4 inline-block">@selectedSubject</span>
                                 <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Zvolte úroveň</h3>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button @onclick='() => SetExamLevel("Přijímačky")' class="level-btn group text-left">
-                                    <div class="w-14 h-14 bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition">
-                                        <i class="ph ph-student text-3xl"></i>
-                                    </div>
-                                    <h4 class="text-slate-900 dark:text-white font-bold text-xl uppercase tracking-tight">Přijímačky</h4>
-                                    <p class="text-slate-500 text-xs mt-2 font-medium">CERMAT testy pro 9. třídu</p>
-                                </button>
+                                @if (selectedSubject != "Anglický jazyk") {
+                                    <button @onclick='() => SetExamLevel("Přijímačky")' class="level-btn group text-left @CurrentTheme.HoverBorder @CurrentTheme.HoverBgContainer">
+                                        <div class="w-14 h-14 @CurrentTheme.BgLight @CurrentTheme.Text rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 @CurrentTheme.HoverBg transition">
+                                            <i class="ph ph-student text-3xl"></i>
+                                        </div>
+                                        <h4 class="text-slate-900 dark:text-white font-bold text-xl uppercase tracking-tight">Přijímačky</h4>
+                                        <p class="text-slate-500 text-xs mt-2 font-medium">CERMAT testy pro 9. třídu</p>
+                                    </button>
+                                }
                                 
-                                <button @onclick='() => SetExamLevel("Maturita")' class="level-btn group text-left">
-                                    <div class="w-14 h-14 bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition">
+                                <button @onclick='() => SetExamLevel("Maturita")' class="level-btn group text-left @CurrentTheme.HoverBorder @CurrentTheme.HoverBgContainer">
+                                    <div class="w-14 h-14 @CurrentTheme.BgLight @CurrentTheme.Text rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 @CurrentTheme.HoverBg transition">
                                         <i class="ph ph-graduation-cap text-3xl"></i>
                                     </div>
                                     <h4 class="text-slate-900 dark:text-white font-bold text-xl uppercase tracking-tight">Maturita</h4>
@@ -248,17 +262,17 @@
                         }
                         else if (modalStep == 10) {
                             <div class="flex items-center gap-3 mb-6">
-                                <button @onclick="() => modalStep = 9" class="w-10 h-10 rounded-full flex items-center justify-center text-rose-500 dark:text-rose-400 transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <button @onclick='() => { if(selectedSubject == "Anglický jazyk") CloseModal(); else modalStep = 9; }' class="w-10 h-10 rounded-full flex items-center justify-center @CurrentTheme.Text transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
                                 <div>
-                                    <span class="bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-200 dark:border-rose-500/30 mb-2 inline-block">@selectedExamLevel</span>
+                                    <span class="@CurrentTheme.BgLight @CurrentTheme.TextDark px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border @CurrentTheme.Border mb-2 inline-block">@selectedExamLevel</span>
                                     <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Výběr ročníku</h3>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 @foreach (var year in new[] { 2025, 2024, 2023, 2022, 2021, 2020 }) {
-                                    <button @onclick="() => SetExamYear(year)" class="year-btn p-5 rounded-2xl transition flex flex-col items-center justify-center gap-2 group">
-                                        <i class="ph ph-calendar-blank text-3xl text-slate-400 dark:text-slate-500 group-hover:text-rose-500 dark:group-hover:text-rose-400 transition"></i>
+                                    <button @onclick="() => SetExamYear(year)" class="year-btn p-5 rounded-2xl transition flex flex-col items-center justify-center gap-2 group @CurrentTheme.HoverBorder @CurrentTheme.HoverBgContainer">
+                                        <i class="ph ph-calendar-blank text-3xl text-slate-400 dark:text-slate-500 @CurrentTheme.HoverText transition"></i>
                                         <span class="text-slate-800 dark:text-white font-bold text-lg">@year</span>
                                     </button>
                                 }
@@ -266,9 +280,9 @@
                         }
                         else if (modalStep == 11) {
                             <div class="flex items-center gap-3 mb-6">
-                                <button @onclick="() => modalStep = 10" class="w-10 h-10 rounded-full flex items-center justify-center text-rose-500 dark:text-rose-400 transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <button @onclick="() => modalStep = 10" class="w-10 h-10 rounded-full flex items-center justify-center @CurrentTheme.Text transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
                                 <div>
-                                    <span class="bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-200 dark:border-rose-500/30 mb-2 inline-block">@selectedExamLevel • @selectedExamYear</span>
+                                    <span class="@CurrentTheme.BgLight @CurrentTheme.TextDark px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border @CurrentTheme.Border mb-2 inline-block">@selectedExamLevel • @selectedExamYear</span>
                                     <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Výběr sady</h3>
                                 </div>
                             </div>
@@ -277,14 +291,22 @@
                                 @{
                                     var examsToRender = new List<(string Id, string Sub)>();
                                     if (selectedExamLevel == "Přijímačky") {
-                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 1. řádný termín", "1. řádný termín • 30 úloh • 50 bodů"));
-                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 2. řádný termín", "2. řádný termín • 30 úloh • 50 bodů"));
-                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 1. náhradní termín", "1. náhradní termín • 30 úloh • 50 bodů"));
-                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 2. náhradní termín", "2. náhradní termín • 30 úloh • 50 bodů"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 1. řádný termín", "1. řádný termín • Kompletní simulace"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 2. řádný termín", "2. řádný termín • Kompletní simulace"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 1. náhradní termín", "1. náhradní termín • Kompletní simulace"));
+                                        examsToRender.Add(($"Didaktický test {selectedExamYear} - 2. náhradní termín", "2. náhradní termín • Kompletní simulace"));
                                     } else {
                                         string shortYear = selectedExamYear.ToString().Substring(2);
-                                        examsToRender.Add(($"M{shortYear}-JARO", "Didaktický test • Kompletní simulace"));
-                                        examsToRender.Add(($"M{shortYear}-PODZIM", "Náhradní/Opravný termín • Kompletní simulace"));
+                                        if (selectedSubject == "Anglický jazyk") {
+                                            examsToRender.Add(($"AJ{shortYear}-JARO", "Didaktický test • Kompletní simulace"));
+                                            examsToRender.Add(($"AJ{shortYear}-PODZIM", "Náhradní/Opravný termín • Kompletní simulace"));
+                                        } else if (selectedSubject == "Matematika") {
+                                            examsToRender.Add(($"M{shortYear}-JARO", "Didaktický test • Kompletní simulace"));
+                                            examsToRender.Add(($"M{shortYear}-PODZIM", "Náhradní/Opravný termín • Kompletní simulace"));
+                                        } else {
+                                            examsToRender.Add(($"CJ{shortYear}-JARO", "Didaktický test • Kompletní simulace"));
+                                            examsToRender.Add(($"CJ{shortYear}-PODZIM", "Náhradní/Opravný termín • Kompletní simulace"));
+                                        }
                                     }
                                 }
 
@@ -295,11 +317,11 @@
                                     
                                     string circleClass = isPassed ? "bg-emerald-500 shadow-emerald-500/40" : 
                                                          isAttempted ? "bg-amber-500 shadow-amber-500/40" : 
-                                                         "bg-rose-500 shadow-rose-500/40";
+                                                         $"{CurrentTheme.BgMain} {CurrentTheme.Shadow}";
                                     
-                                    <button @onclick='() => StartExam(exam.Id)' class="test-btn active-test group flex items-center justify-between">
+                                    <button @onclick='() => GoToExamSettings(exam.Id)' class="test-btn active-test group flex items-center justify-between @CurrentTheme.ActiveTestBorder @CurrentTheme.HoverBorder @CurrentTheme.HoverBgContainer">
                                         <div class="text-left">
-                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">@exam.Id</h4>
+                                            <h4 class="text-slate-900 dark:text-white font-bold text-lg @CurrentTheme.HoverText transition">@exam.Id</h4>
                                             <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">@exam.Sub</p>
                                         </div>
                                         <div class="w-14 h-14 rounded-full @circleClass flex flex-col items-center justify-center shadow-lg group-hover:scale-110 transition shrink-0 ml-4">
@@ -313,6 +335,39 @@
                                     </button>
                                 }
                             </div>
+                        }
+                        else if (modalStep == 12) {
+                            <div class="flex items-center gap-3 mb-6">
+                                <button @onclick="() => modalStep = 11" class="w-10 h-10 rounded-full flex items-center justify-center @CurrentTheme.Text transition modal-action-btn"><i class="ph ph-arrow-left text-xl"></i></button>
+                                <div>
+                                    <span class="@CurrentTheme.BgLight @CurrentTheme.TextDark px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border @CurrentTheme.Border mb-2 inline-block">@selectedTestId</span>
+                                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Nastavení testu</h3>
+                                </div>
+                            </div>
+
+                            <div class="glass-card rounded-2xl p-5 md:p-6 mb-8 border border-slate-200 dark:border-white/5 bg-slate-100/50 dark:bg-slate-900/50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 @CurrentTheme.BgLight @CurrentTheme.Text rounded-xl flex items-center justify-center shadow-inner">
+                                            <i class="ph ph-timer text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900 dark:text-white text-lg">Časový limit</h4>
+                                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                                @(selectedExamLevel == "Přijímačky" ? "60 minut" : "85 minut") na vypracování
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <button @onclick="() => useTimeLimit = !useTimeLimit" class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none @(useTimeLimit ? CurrentTheme.BgMain : "bg-slate-300 dark:bg-slate-700")">
+                                        <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform @(useTimeLimit ? "translate-x-8 shadow-md" : "translate-x-1")"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button @onclick="StartExamFinal" class="w-full @CurrentTheme.Btn text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl transition active:scale-95 flex items-center justify-center gap-2">
+                                <i class="ph ph-play-fill text-xl"></i> Spustit simulaci
+                            </button>
                         }
                     </div>
                 </div>
@@ -330,7 +385,6 @@
     .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,0,0,0.05); }
     .dark .glass-nav { background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
     
-    /* Sdílené prvky pro Sidebar */
     .theme-toggle-btn { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .dark .theme-toggle-btn { background: rgba(255,255,255,0.05); border-color: transparent; box-shadow: none; }
     .theme-toggle-btn:hover { background: #f8fafc; }
@@ -352,7 +406,6 @@
     .dark .nav-item.active { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.2); box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.05); color: #818cf8; }
     .nav-item i { font-size: 20px; }
     
-    /* Styly zkopírované z Modalu */
     .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.05); }
     .dark .glass-card { background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255, 255, 255, 0.05); }
     
@@ -380,22 +433,16 @@
 
     .level-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); padding: 24px; border-radius: 24px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .dark .level-btn { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: none; }
-    .level-btn:hover { border-color: rgba(251, 113, 133, 0.4); background: rgba(255, 241, 242, 0.8); transform: translateY(-2px); }
-    .dark .level-btn:hover { border-color: rgba(244, 63, 94, 0.5); background: rgba(30, 41, 59, 0.6); }
+    .level-btn:hover { transform: translateY(-2px); }
 
     .year-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .dark .year-btn { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: none; }
-    .year-btn:hover { border-color: rgba(251, 113, 133, 0.4); background: rgba(255, 241, 242, 0.8); transform: translateY(-2px); }
-    .dark .year-btn:hover { border-color: rgba(244, 63, 94, 0.5); background: rgba(30, 41, 59, 0.6); }
+    .year-btn:hover { transform: translateY(-2px); }
 
     .test-btn { width: 100%; text-align: left; padding: 20px; border-radius: 16px; transition: all 0.3s; }
-    .test-btn.active-test { background: #ffffff; border: 1px solid rgba(251, 113, 133, 0.3); box-shadow: 0 4px 15px rgba(244, 63, 94, 0.08); }
-    .dark .test-btn.active-test { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(244, 63, 94, 0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .test-btn.active-test:hover { background: rgba(255, 241, 242, 0.5); border-color: rgba(251, 113, 133, 0.5); transform: scale(0.98); }
-    .dark .test-btn.active-test:hover { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.5); transform: scale(0.98); }
-    
-    .test-btn.locked-test { background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(0, 0, 0, 0.05); opacity: 0.6; cursor: not-allowed; }
-    .dark .test-btn.locked-test { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0.5; }
+    .test-btn.active-test { background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .dark .test-btn.active-test { background: rgba(30, 41, 59, 0.6); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .test-btn.active-test:hover { transform: scale(0.98); }
 
     .font-outfit { font-family: 'Outfit', sans-serif; }
     .animate-fade-in { animation: fadeIn 0.4s ease-out; }
@@ -427,13 +474,74 @@
     // Logika pro zkoušky a jejich skóre
     public string selectedExamLevel = "";
     public int selectedExamYear = 2025;
+    public string selectedTestId = "";
+    public bool useTimeLimit = true;
     
-    // NOVÉ: Drží nejvyšší skóre uživatele pro každý test
     private Dictionary<string, int> userExamScores = new();
 
-    // LEVEL UP MODÁL LOGIKA
     private bool showLevelUpModal = false;
     private int newLevelToShow = 0;
+
+    // DYNAMICKÁ TÉMATA
+    private class ExamTheme {
+        public string BgLight { get; set; } = "";
+        public string Text { get; set; } = "";
+        public string TextDark { get; set; } = "";
+        public string Border { get; set; } = "";
+        public string BgMain { get; set; } = "";
+        public string Btn { get; set; } = "";
+        public string Shadow { get; set; } = "";
+        public string HoverText { get; set; } = "";
+        public string HoverBg { get; set; } = "";
+        public string HoverBorder { get; set; } = "";
+        public string HoverBgContainer { get; set; } = "";
+        public string ActiveTestBorder { get; set; } = "";
+    }
+
+    private ExamTheme CurrentTheme => selectedSubject switch {
+        "Anglický jazyk" => new ExamTheme {
+            BgLight = "bg-sky-100 dark:bg-sky-500/20",
+            Text = "text-sky-500 dark:text-sky-400",
+            TextDark = "text-sky-700 dark:text-sky-300",
+            Border = "border-sky-200 dark:border-sky-500/30",
+            BgMain = "bg-sky-500",
+            Btn = "bg-sky-600 hover:bg-sky-500 shadow-sky-500/20",
+            Shadow = "shadow-sky-500/40",
+            HoverText = "group-hover:text-sky-600 dark:group-hover:text-sky-400",
+            HoverBg = "group-hover:bg-sky-500 group-hover:text-white",
+            HoverBorder = "hover:border-sky-400 dark:hover:border-sky-500",
+            HoverBgContainer = "hover:bg-sky-50 dark:hover:bg-sky-900/20",
+            ActiveTestBorder = "border border-[rgba(14,165,233,0.3)] dark:border-[rgba(14,165,233,0.3)]"
+        },
+        "Matematika" => new ExamTheme {
+            BgLight = "bg-blue-100 dark:bg-blue-500/20",
+            Text = "text-blue-500 dark:text-blue-400",
+            TextDark = "text-blue-700 dark:text-blue-300",
+            Border = "border-blue-200 dark:border-blue-500/30",
+            BgMain = "bg-blue-500",
+            Btn = "bg-blue-600 hover:bg-blue-500 shadow-blue-500/20",
+            Shadow = "shadow-blue-500/40",
+            HoverText = "group-hover:text-blue-600 dark:group-hover:text-blue-400",
+            HoverBg = "group-hover:bg-blue-500 group-hover:text-white",
+            HoverBorder = "hover:border-blue-400 dark:hover:border-blue-500",
+            HoverBgContainer = "hover:bg-blue-50 dark:hover:bg-blue-900/20",
+            ActiveTestBorder = "border border-[rgba(59,130,246,0.3)] dark:border-[rgba(59,130,246,0.3)]"
+        },
+        _ => new ExamTheme { // Český jazyk (výchozí)
+            BgLight = "bg-rose-100 dark:bg-rose-500/20",
+            Text = "text-rose-500 dark:text-rose-400",
+            TextDark = "text-rose-700 dark:text-rose-300",
+            Border = "border-rose-200 dark:border-rose-500/30",
+            BgMain = "bg-rose-500",
+            Btn = "bg-rose-600 hover:bg-rose-500 shadow-rose-500/20",
+            Shadow = "shadow-rose-500/40",
+            HoverText = "group-hover:text-rose-600 dark:group-hover:text-rose-400",
+            HoverBg = "group-hover:bg-rose-500 group-hover:text-white",
+            HoverBorder = "hover:border-rose-400 dark:hover:border-rose-500",
+            HoverBgContainer = "hover:bg-rose-50 dark:hover:bg-rose-900/20",
+            ActiveTestBorder = "border border-[rgba(244,63,94,0.3)] dark:border-[rgba(244,63,94,0.3)]"
+        }
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -477,11 +585,7 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private void CloseLevelUpModal()
-    {
-        showLevelUpModal = false;
-    }
-
+    private void CloseLevelUpModal() => showLevelUpModal = false;
     private void ToggleNav() => isNavOpen = !isNavOpen;
     private void CloseNav() => isNavOpen = false;
 
@@ -505,16 +609,25 @@
         StateHasChanged();
     }
 
-    public void StartExamSelection(string subject) {
-        selectedSubject = subject;
-        modalStep = 9;
-        isModalOpen = true;
-        StateHasChanged();
-    }
-
+    // Tady jsou metody volané z Home.razor:
     public void StartExamSelectionCZ() => StartExamSelection("Český jazyk");
     public void StartExamSelectionAJ() => StartExamSelection("Anglický jazyk");
     public void StartExamSelectionMAT() => StartExamSelection("Matematika");
+
+    public void StartExamSelection(string subject) {
+        selectedSubject = subject;
+        
+        // PŘESKOČENÍ KROKU 9 PRO AJ (MÁ JEN MATURITU)
+        if (subject == "Anglický jazyk") {
+            selectedExamLevel = "Maturita";
+            modalStep = 10;
+        } else {
+            modalStep = 9;
+        }
+        
+        isModalOpen = true;
+        StateHasChanged();
+    }
 
     public void SetExamLevel(string level) {
         selectedExamLevel = level;
@@ -529,7 +642,14 @@
         StateHasChanged();
     }
 
-    public void StartExam(string testId) {
+    public void GoToExamSettings(string testId) {
+        selectedTestId = testId;
+        useTimeLimit = true;
+        modalStep = 12;
+        StateHasChanged();
+    }
+
+    public void StartExamFinal() {
         string subjCode = selectedSubject switch {
             "Český jazyk" => "cj",
             "Anglický jazyk" => "aj",
@@ -537,10 +657,11 @@
             _ => "cj"
         };
         
+        int timeLimitInMinutes = useTimeLimit ? (selectedExamLevel == "Přijímačky" ? 60 : 85) : 0;
+        
         CloseModal();
-        Navigation.NavigateTo($"/exam/{subjCode}/{testId}");
+        Navigation.NavigateTo($"/exam/{subjCode}/{selectedTestId}?timeLimit={timeLimitInMinutes}");
     }
-
 
     public void SelectTopic(string topic) { selectedTopic = topic; modalStep = 2; StateHasChanged(); }
     public void SelectMode(string mode) { selectedMode = mode; modalStep = 3; StateHasChanged(); }
