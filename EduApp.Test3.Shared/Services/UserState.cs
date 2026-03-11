@@ -17,7 +17,7 @@ public class UserState
 
     public bool IsLoggedIn { get; private set; } = false;
     
-    public bool IsAdmin => Email == "admin@test.pro";
+    public bool IsAdmin => Email == "b3inapp@gmail.com";
     
     public string UserName { get; private set; } = "";
     public string Email { get; private set; } = "";
