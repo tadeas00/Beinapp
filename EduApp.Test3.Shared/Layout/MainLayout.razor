@@ -311,8 +311,11 @@
                                 }
 
                                 @foreach (var exam in examsToRender) {
+                                    int passThreshold = selectedSubject == "Anglický jazyk" ? 80 : 40;
+                                    int maxPoints = selectedSubject == "Anglický jazyk" ? 100 : 50;
+
                                     int score = userExamScores.TryGetValue(exam.Id, out var s) ? s : 0;
-                                    bool isPassed = score >= 30; // 30+ bodů je zelená
+                                    bool isPassed = score >= passThreshold;
                                     bool isAttempted = score > 0; // zkoušeno, ale nepokořena hranice je žlutá/oranžová
                                     
                                     string circleClass = isPassed ? "bg-emerald-500 shadow-emerald-500/40" : 
@@ -327,7 +330,7 @@
                                         <div class="w-14 h-14 rounded-full @circleClass flex flex-col items-center justify-center shadow-lg group-hover:scale-110 transition shrink-0 ml-4">
                                             @if (isAttempted) {
                                                 <span class="text-white font-black text-lg leading-none">@score</span>
-                                                <span class="text-white/80 text-[8px] font-bold uppercase tracking-widest mt-0.5">z 50</span>
+                                                <span class="text-white/80 text-[8px] font-bold uppercase tracking-widest mt-0.5">z @maxPoints</span>
                                             } else {
                                                 <i class="ph ph-play-fill text-xl text-white"></i>
                                             }
