@@ -7,13 +7,15 @@ namespace EduApp.Test3.Shared.Services
     public enum TaskCategory { MultipleChoice, Matching, TrueFalse, Ordering, Correction, Filling }
 
     public class SubItem { public string Id { get; set; } = ""; public string Text { get; set; } = ""; public string ExpectedAnswer { get; set; } = ""; public string UserAnswer { get; set; } = ""; }
-    public class TaskOption { public string Label { get; set; } = ""; public string Text { get; set; } = ""; }
+    public class TaskOption { public string Label { get; set; } = ""; public string Text { get; set; } = ""; public string ImageUrl { get; set; } = ""; }
 
     public class CermatTask
     {
         public string TaskNumber { get; set; } = "";
         public string Instruction { get; set; } = "";
         public string TextBase { get; set; } = "";
+        public string AudioPath { get; set; }
+        public string ImageUrl { get; set; } = ""; 
         public TaskCategory Category { get; set; }
         public int MaxPoints { get; set; }
         public int EarnedPoints { get; set; }
@@ -40,7 +42,347 @@ namespace EduApp.Test3.Shared.Services
             if (testId == "Didaktický test 2025 - 1. náhradní termín") return GetC9C2025();
             if (testId == "Didaktický test 2025 - 2. náhradní termín") return GetC9D2025();
             if (testId == "M25-PODZIM") return GetMaturita2025Podzim();
+            if (testId == "AJ25-PODZIM") return GetAjMaturita2025Podzim();
             return new List<CermatTask>();
+        }
+        
+        private List<CermatTask> GetAjMaturita2025Podzim()
+        {
+            return new List<CermatTask>
+            {
+                // ČÁST 1: Poslech 1-4 (s obrázky)
+                new CermatTask { 
+                    TaskNumber = "1", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "1. Where were the man's glasses found this time?", 
+                    AudioPath = "aj_podzim_2025/task_1.mp3", 
+                    ImageUrl = "aj_podzim_2025/task_1.png",
+                    ExpectedAnswer = "B", 
+                    Options = new() { 
+                        new TaskOption { Label = "A" }, 
+                        new TaskOption { Label = "B" }, 
+                        new TaskOption { Label = "C" }, 
+                        new TaskOption { Label = "D" } 
+                    } 
+                },
+                new CermatTask { 
+                    TaskNumber = "2", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "2. What does Amelia look forward to doing at Easter nowadays?", 
+                    AudioPath = "aj_podzim_2025/task_2.mp3", 
+                    ImageUrl = "aj_podzim_2025/task_2.png",
+                    ExpectedAnswer = "C", 
+                    Options = new() { 
+                        new TaskOption { Label = "A" }, 
+                        new TaskOption { Label = "B" }, 
+                        new TaskOption { Label = "C" }, 
+                        new TaskOption { Label = "D" } 
+                    } 
+                },
+                new CermatTask { 
+                    TaskNumber = "3", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "3. Which family did George work for in France?", 
+                    AudioPath = "aj_podzim_2025/task_3.mp3", 
+                    ImageUrl = "aj_podzim_2025/task_3.png",
+                    ExpectedAnswer = "C", 
+                    Options = new() { 
+                        new TaskOption { Label = "A" }, 
+                        new TaskOption { Label = "B" }, 
+                        new TaskOption { Label = "C" }, 
+                        new TaskOption { Label = "D" } 
+                    } 
+                },
+                new CermatTask { 
+                    TaskNumber = "4", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "4. Where is the end-of-year party going to take place this year?", 
+                    AudioPath = "aj_podzim_2025/task_4.mp3", 
+                    ImageUrl = "aj_podzim_2025/task_4.png",
+                    ExpectedAnswer = "C", 
+                    Options = new() { 
+                        new TaskOption { Label = "A" }, 
+                        new TaskOption { Label = "B" }, 
+                        new TaskOption { Label = "C" }, 
+                        new TaskOption { Label = "D" } 
+                    } 
+                },
+
+                // ČÁST 2: Poslech 5-12 (True/False)
+                new CermatTask { 
+                    TaskNumber = "5-12", Category = TaskCategory.TrueFalse, MaxPoints = 8, 
+                    Instruction = "Uslyšíte rozhovor mezi přáteli o jejich studiích a brigádách. Rozhodněte, zda jsou tvrzení pravdivá (ANO = P), nebo nepravdivá (NE = N).", 
+                    AudioPath = "aj_podzim_2025/part_2.mp3", 
+                    Items = new() { 
+                        new SubItem { Id = "5", Text = "Linda is going to study French at university this year.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "6", Text = "Jack is going to sell his first-year university textbooks to Linda.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "7", Text = "Jack's parents paid for his first year at university.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "8", Text = "Jack used to work part-time for a restaurant.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "9", Text = "Jack needs the knowledge gained at university in his current part-time job.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "10", Text = "Linda has enough money to pay for two years of her university studies.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "11", Text = "Linda is planning to apply for a university grant.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "12", Text = "Linda finds her current job pleasant.", ExpectedAnswer = "ANO" } 
+                    } 
+                },
+
+                // ČÁST 3: Poslech 13-20 (Doplňování)
+                new CermatTask { 
+                    TaskNumber = "13-20", Category = TaskCategory.Filling, MaxPoints = 16, InputFieldsCount = 8, 
+                    Instruction = "Uslyšíte moderátora v rádiu hovořit o astronautu Jimu Lovellovi. Odpovězte v anglickém jazyce (nejvýše 3 slova).", 
+                    AudioPath = "aj_podzim_2025/part_3.mp3", 
+                    TextBase = @"<div class='space-y-4 font-medium'>
+                        <p>13. How many times did Jim go to space before the Apollo 13 mission?<br><b>[ 1 ]</b> times</p>
+                        <p>14. How old was Jim at the time of the Apollo 13 mission?<br><b>[ 2 ]</b> years old</p>
+                        <p>15. Which country did Jim's father come from?<br><b>[ 3 ]</b></p>
+                        <p>16. Which sport did Jim play at university?<br><b>[ 4 ]</b></p>
+                        <p>17. What was Jim's girlfriend Marilyn's dream job?<br><b>[ 5 ]</b></p>
+                        <p>18. How many kilometres from Earth was Apollo 13 when it had an accident?<br><b>[ 6 ]</b> km</p>
+                        <p>19. What does Jim wish he could do?<br><b>[ 7 ]</b></p>
+                        <p>20. What is the e-mail address of the reporter?<br><b>[ 8 ]</b> @radio1.com</p>
+                    </div>", 
+                    ExpectedInputs = new[] { "3/three", "42/forty-two", "canada", "football", "an actress/the actress/actress", "321 900/321,900/321900", "to speak czech/speak czech", "haughs" } 
+                },
+
+                // ČÁST 4: Poslech 21-24
+                new CermatTask { 
+                    TaskNumber = "21", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "21. Who is the girl going to travel with?", 
+                    AudioPath = "aj_podzim_2025/task_21.mp3", ExpectedAnswer = "C", 
+                    Options = new() { new TaskOption { Label = "A", Text = "nobody" }, new TaskOption { Label = "B", Text = "strangers" }, new TaskOption { Label = "C", Text = "her cousin" }, new TaskOption { Label = "D", Text = "two friends" } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "22", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "22. Why is Alice Cooper calling the Kalimera Beach Hotel?", 
+                    AudioPath = "aj_podzim_2025/task_22.mp3", ExpectedAnswer = "B", 
+                    Options = new() { new TaskOption { Label = "A", Text = "to ask for a meal discount" }, new TaskOption { Label = "B", Text = "to change her booking details" }, new TaskOption { Label = "C", Text = "to complain about her accommodation" }, new TaskOption { Label = "D", Text = "to ask about an extra fee for the wellness services" } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "23", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "23. What does Stanley think about the people in his new neighbourhood?", 
+                    AudioPath = "aj_podzim_2025/task_23.mp3", ExpectedAnswer = "C", 
+                    Options = new() { new TaskOption { Label = "A", Text = "They're lazy." }, new TaskOption { Label = "B", Text = "They're quiet." }, new TaskOption { Label = "C", Text = "They're friendly." }, new TaskOption { Label = "D", Text = "They're stressed." } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "24", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "24. Where is John planning to take his girlfriend Jane on their next date?", 
+                    AudioPath = "aj_podzim_2025/task_24.mp3", ExpectedAnswer = "C", 
+                    Options = new() { new TaskOption { Label = "A", Text = "on a boat trip" }, new TaskOption { Label = "B", Text = "on a castle tour" }, new TaskOption { Label = "C", Text = "for a picnic in a forest" }, new TaskOption { Label = "D", Text = "for dinner in a restaurant" } } 
+                },
+
+                // ČÁST 5: Čtení 25-29
+                new CermatTask { 
+                    TaskNumber = "25", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "25. What happened to Jim Thorpe during the 1912 Summer Olympics?", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>Jim Thorpe, the First Native American to Win an Olympic Gold Medal</h4>
+                        <p class='text-sm text-justify'>Jim Thorpe was a Native American who took part in the 1912 Summer Olympics and won several medals. On his first day there, Thorpe started with the 100-meter race which he ran in the best time in the world until it was beaten thirty-six years later. On his second day, Thorpe couldn't find his shoes. He didn't have time to look for them and so he got two different ones from the garbage instead. He still won that day. On the final day, he had to throw the javelin and he nearly broke it with one of his tries. The last event was the 1,500-meter run and Thorpe was still in the trainers that didn't match because he had failed to find his original ones. Although Jim Thorpe was a great American athlete, he was asked to return his medals seven months after the 1912 Olympics. It happened because it was discovered that he had been a semi-professional baseball player, and the Olympics were only for amateurs at that time.</p>
+                    </div>", 
+                    ExpectedAnswer = "C", 
+                    Options = new() { new TaskOption { Label = "A", Text = "His javelin broke." }, new TaskOption { Label = "B", Text = "His shoes were missing." }, new TaskOption { Label = "C", Text = "His medals were taken away from him." }, new TaskOption { Label = "D", Text = "His record in the 100-meter race was beaten." } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "26", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "26. What is true about Scotland according to the article?", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>National Parks in Scotland</h4>
+                        <p class='text-sm text-justify'>Good news for nature lovers: Scotland is going to have a brand-new national park soon! And where will the new park be? There've been lots of places suggested by people from all over the nation. Will it be Scotland's highest mountain and the area around it? It will be decided in the next few years. The final location of the park could be chosen either because people think it's a beautiful place, or because it's historically interesting. The brand-new national park is going to join the first and the second already existing: Cairngorms National Park created in 2003 and Loch Lomond & The Trossachs National Park created a year earlier. The term national park also brings many changes to local people. For example, with more tourists, there will be more local businesses and more jobs. Although tourists also mean pollution, people living in the areas around the parks aren't unhappy about the changes.</p>
+                    </div>", 
+                    ExpectedAnswer = "B", 
+                    Options = new() { new TaskOption { Label = "A", Text = "There are two national parks there." }, new TaskOption { Label = "B", Text = "Its first national park was created in 2003." }, new TaskOption { Label = "C", Text = "People living near its national parks dislike local tourism." }, new TaskOption { Label = "D", Text = "Its highest mountain and the area around it were chosen as the new national park." } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "27", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "27. What is the best title for the article?", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <p class='text-sm text-justify'>Dan Jones from Utah turned to Facebook for advice when he found himself locked inside the 24-Hour Fitness gym late on Saturday night. 'Doesn't the name suggest that they stay open 24 hours?' Jones wrote in his Facebook post. Although his Facebook friends gave him a lot of advice, it was not useful. So, he left the app and called his wife, who suggested not moving much and waiting until morning. She was afraid the alarm system would start making a loud noise if Dan was moving around and that would get the police to arrive. But Dan decided to do just the opposite of what she said. He then sat down and waited for the police. When they came, they caught Dan sitting on the floor. He explained that he was no thief, he had just got locked inside. So they let him out and he didn't have to sleep there. What had happened was that the opening hours were currently 4 am - midnight. The gym manager had changed them from 24 hours a day the previous week.</p>
+                    </div>", 
+                    ExpectedAnswer = "C", 
+                    Options = new() { new TaskOption { Label = "A", Text = "Utah Man in Fitness Gym Found Help on Facebook" }, new TaskOption { Label = "B", Text = "Utah Man Caught Stealing Things in a Fitness Gym" }, new TaskOption { Label = "C", Text = "Utah Man Locked Inside a Fitness Gym for 24 Hours" }, new TaskOption { Label = "D", Text = "Utah Man Used Alarm System to Get Out of Fitness Gym" } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "28", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "28. What is Jennifer going to add to her box for delivery drivers in December?", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>Act of Kindness: Reward for Delivery Drivers</h4>
+                        <p class='text-sm text-justify'>I started leaving a box with little presents for delivery drivers at my door last November. It was a way of thanking them for their hard work. Apart from thank-you notes, I left energy drinks in the box, along with other things. In December I added Christmas biscuits. They ended up being the most popular among the drivers, so this year they are in the box already even though it is only November! Today I'm going to add energy drinks to the box after I buy them. I haven't had the time yet as I was making thank-you notes. I'm going to put them into the box tomorrow. What is still missing is chewing gum. It was popular last year as well. This time I'll buy special Christmas gum online. The sale begins in ten days, and as soon as I've got it, I'm going to add it to the box. What do you think about such a way of saying thank you to delivery drivers?</p>
+                    </div>", 
+                    ExpectedAnswer = "A", 
+                    Options = new() { new TaskOption { Label = "A", Text = "Christmas biscuits" }, new TaskOption { Label = "B", Text = "thank-you notes" }, new TaskOption { Label = "C", Text = "chewing gum" }, new TaskOption { Label = "D", Text = "energy drinks" } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "29", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "29. Why did White Desert send an aircrew to Antarctica?", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>Airbus A340 Plane Lands in Antarctica for the First Time</h4>
+                        <p class='text-sm text-justify'>On November 2, 2021, an Airbus A340 landed in Antarctica for the first time in history. The flight was ordered and paid for by an extreme tourism company called White Desert to make sure the Antarctic expedition could continue as it was running out of food and other supplies out there. Landing a plane in Antarctica was a new experience due to the lack of an airport there. The first recorded flight to Antarctica was a small plane ninety years ago. It made short trips to help scientists create an accurate map of the continent's shores. The crew of the Airbus A340 also took photos of the shores to show their families. The captain also added, 'White Desert will hire us to keep flying tourists and scientists to and from Antarctica. Getting people there and picking them up from there will be quicker with us than with the ship they've been using so far!'</p>
+                    </div>", 
+                    ExpectedAnswer = "D", 
+                    Options = new() { new TaskOption { Label = "A", Text = "to pick people up from there" }, new TaskOption { Label = "B", Text = "to try out the new airport there" }, new TaskOption { Label = "C", Text = "to take new photos of its shores for scientists" }, new TaskOption { Label = "D", Text = "to bring essential things to people staying there" } } 
+                },
+
+                // ČÁST 6: Čtení 30-39 (True/False)
+                new CermatTask { 
+                    TaskNumber = "30-39", Category = TaskCategory.TrueFalse, MaxPoints = 10, 
+                    Instruction = "Přečtěte si tvrzení v úlohách 30-39 a text o hotelu. Rozhodněte, zda jsou tvrzení pravdivá (ANO = P), nebo nepravdivá (NE = N).", 
+                    TextBase = @"<div class='space-y-4'>
+                        <div class='text-center mb-4'>
+                            <h3 class='text-xl font-bold'>The Movie Hotel</h3>
+                            <p class='text-xs text-slate-500'>2227 Ocean Boulevard, Miami Beach, Florida</p>
+                        </div>
+                        <p class='text-sm text-justify'>The Movie Hotel was built in 2017 and it has been extremely popular since then. It makes its owner James K. Wright, an American movie fan, really happy. He can't imagine doing anything else now besides running the hotel. Luckily, one summer his Dutch cousin suggested building this hotel, otherwise James would probably still have his boring bank office job today. James' parents, as well as his grandma, help him run the hotel he owns and he lets them live there with him for free.</p>
+                        <p class='text-sm text-justify'>The hardest part about building and opening The Movie Hotel was getting the permissions necessary to start. While regular permissions took only months to get, other permissions took longer. It was mainly because the hotel was planned to consist of seven apartments created to look exactly like certain movie or TV show sets. Therefore, James K. Wright had to ask the TV and movie companies whether he could create copies of their movie or TV show sets for his hotel. Two agreed almost immediately while some took a year to answer and others refused so James had to ask someone else. However, when you arrive at the hotel, you will see why the three years of waiting for the companies to say yes were absolutely worth it.</p>
+                        <p class='text-sm text-justify'>To book an apartment in The Movie Hotel, just visit www.themoviehotel.com. The website is super easy to use. Visitors can even have fun trying to book an apartment for less money than usual: all they have to do is answer twenty questions in a quiz regarding the corresponding movie/TV show correctly in two minutes. The only other way to pay less is early booking.</p>
+                        <h4 class='font-bold mt-4 text-center'>The Top 3 Apartments</h4>
+                        <h4 class='font-bold mt-4 text-sky-600 dark:text-sky-400'>The Friends Apartment</h4>
+                        <p class='text-sm text-justify'>Who wouldn't remember Monica and Rachel's apartment in New York? A large living room, two bedrooms, Monica's kitchen and the purple door with a golden frame on it! A basket of free cookies on the table will welcome the guests. Baking your own cookies in the apartment's oven is impossible as the only thing that actually works in the kitchen is the fridge. The apartment has two bedrooms. One person can stay in each, of course, but booking it for more guests is also possible. There is a double bed in each of the bedrooms and a big couch in the living room. And the view? Guests can see the Atlantic Ocean through palm trees. If the apartment wasn't on the third floor, but higher, the Atlantic could be seen more clearly.<br><b>Booking:</b> There is only one week left this autumn! Don't wait, book now!</p>
+                        <h4 class='font-bold mt-4 text-sky-600 dark:text-sky-400'>The Bridget Jones Apartment</h4>
+                        <p class='text-sm text-justify'>Welcome to a cozy apartment for one, in which Bridget Jones dealt with her life, often with a bottle of wine. Guests will find several bottles of wine in the fridge so they can sit on the couch with a glass and enjoy their stay in the apartment. They can drink as many bottles of wine as they like, but only one of them is part of the apartment cost. Others will be charged as extra when the guests check out. Guests can also enjoy the view from the apartment. Now that the owner has moved it from the second floor one floor higher, guests have a great view of the city of Miami.<br><b>Booking:</b> The earliest available reservation is for next autumn.</p>
+                        <h4 class='font-bold mt-4 text-sky-600 dark:text-sky-400'>The Big Bang Theory Apartment</h4>
+                        <p class='text-sm text-justify'>Enjoy making hot tea and drinking it while sitting in Sheldon's spot on the couch! Yes indeed, guests will even find the main character's favourite spot in the apartment! Guests have permission from the owner to do any activity from the TV show, except for karaoke. Although the apartment is large and more than two people could stay, the owner only allows booking for two. The apartment is on the top floor with a view of the ocean.<br><b>Booking:</b> Two autumn weeks are still available in this year's almost fully booked season.</p>
+                    </div>",
+                    Items = new() { 
+                        new SubItem { Id = "30", Text = "The idea to build The Movie Hotel came from an American.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "31", Text = "The owner of the hotel lives in it.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "32", Text = "It took a year to get all the permissions to build and open the hotel.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "33", Text = "The only way to get a discount for booking an apartment is to pass a quiz.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "34", Text = "The oven in The Friends Apartment actually works.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "35", Text = "A bottle of wine in the fridge in The Bridget Jones Apartment is included in the price.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "36", Text = "The Friends Apartment and The Bridget Jones Apartment are on the same floor.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "37", Text = "Karaoke is forbidden in The Big Bang Theory Apartment.", ExpectedAnswer = "ANO" }, 
+                        new SubItem { Id = "38", Text = "More than two people are allowed to stay in The Friends Apartment as well as in The Big Bang Theory Apartment.", ExpectedAnswer = "NE" }, 
+                        new SubItem { Id = "39", Text = "Both The Bridget Jones Apartment and The Big Bang Theory Apartment are fully booked this autumn.", ExpectedAnswer = "NE" } 
+                    } 
+                },
+
+                // ČÁST 7: Čtení 40-44
+                new CermatTask { 
+                    TaskNumber = "40", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "40. What did Kenny hate about spiders?", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl space-y-3'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>Spiders - Blog by Kenny Murphy</h4>
+                        <p class='text-sm text-justify'>Some people might be afraid of certain places, situations or objects so much that their fear can cause problems in their lives. I was scared of spiders, so I was happy to take part in the 'Friendly Spider Programme' at the London Zoo, which helps people get over their fear of these creatures. The programme started with an introduction after which we had a group session. Everybody tried to explain why they hated spiders. Most ladies couldn't stand the way spiders get from one place to another. Most men didn't care about spiders' movements, but they hated their black bodies. Just the idea of touching spiders made their hearts beat much faster. Others experienced the same feeling every time a spider web touched their skin. Only a few people admitted hating spiders because they have long legs. Some people couldn't stand more things than just one, but that wasn't my case: I only hated the same thing as most of the ladies did. But while our reasons were different, our reaction to spiders was not - we were terrified of them.</p>
+                        <p class='text-sm text-justify'>After the chat, it was time for relaxation exercises with an instructor. He kept telling us, 'From now on, you will be calm and just fine when you see a spider.' And I tried my best to relax. But when I closed my eyes, I couldn't avoid seeing myself with a spider in my hand and I started to feel nervous again. The pictures I created in my mind were scary. However, the exercises helped and just after they were over, I felt calm. I'd managed to make all my fear disappear. And then the most difficult part of the programme came, a practical exercise: London Zoo's spider expert David Clarke took us to meet and touch spiders. He was excited about it and so were some other people, but not me because it was still difficult for me to be so close to spiders, and I wasn't sure what my reaction would be. In the end I did it and I'm really excited that I experienced it.</p>
+                        <p class='text-sm text-justify'>I was sent to the programme by chance to write an article about it for the magazine I was working for. My boss loved spiders and even kept one at home. Luckily, he avoided having a spider at work. But it was perfect timing as well: I was planning to go on a two-week trip to a tropical forest with my new girlfriend and I didn't want to let my fear of spiders spoil it. She stopped being afraid of spiders weeks before for the same reason. She is far from being a fan of them, but she is able to ignore them now. I had my goal in mind when the expert put a spider in my hand during the programme in the zoo. I could hold it with little difficulty. I did it! Thanks to the 'Friendly Spider Programme' spiders didn't bother me anymore. When I called my mum to tell her, I thought she'd say I'd wasted my time, but my mum was so proud of me!</p>
+                        <p class='text-sm text-justify'>My life without a fear of spiders has been cool. When I travel, for example, I no longer check my hotel room for spiders. It used to be the first thing I did, and I often found one. I know some people hit it with their shoe as hard as they can when they see one. I can't make myself do that. Besides, I'd have to get rid of its little dead body afterwards. Sure, I can ask the cleaning service to vacuum it up. I'd like to be able to vacuum up a dead spider one day too. See, after the experience in the London Zoo, I'm proud to say that I pick the spider up, quickly carry it outside and shut the door. My girlfriend might prefer me hitting the spider, but I'd rather it lived. However, I hope that one day I will pay no attention to a spider when I see it. I'll let it be. That would be cool!</p>
+                    </div>", 
+                    ExpectedAnswer = "C", 
+                    Options = new() { new TaskOption { Label = "A", Text = "their webs" }, new TaskOption { Label = "B", Text = "their long legs" }, new TaskOption { Label = "C", Text = "their movements" }, new TaskOption { Label = "D", Text = "their black bodies" } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "41", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "41. How did Kenny feel immediately after the relaxation exercises?", 
+                    ExpectedAnswer = "A", 
+                    Options = new() { new TaskOption { Label = "A", Text = "calm" }, new TaskOption { Label = "B", Text = "scared" }, new TaskOption { Label = "C", Text = "excited" }, new TaskOption { Label = "D", Text = "nervous" } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "42", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "42. Why did Kenny want to stop being scared of spiders?", 
+                    ExpectedAnswer = "B", 
+                    Options = new() { new TaskOption { Label = "A", Text = "he wanted to make his mum proud of him." }, new TaskOption { Label = "B", Text = "he wanted to have a nice jungle trip." }, new TaskOption { Label = "C", Text = "his new boss had one in his office." }, new TaskOption { Label = "D", Text = "his girlfriend loved them." } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "43", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "43. What does Kenny do now when he sees a spider?", 
+                    ExpectedAnswer = "D", 
+                    Options = new() { new TaskOption { Label = "A", Text = "He hits it." }, new TaskOption { Label = "B", Text = "He lets it be." }, new TaskOption { Label = "C", Text = "He vacuums it up." }, new TaskOption { Label = "D", Text = "He takes it outside." } } 
+                },
+                new CermatTask { 
+                    TaskNumber = "44", Category = TaskCategory.MultipleChoice, MaxPoints = 2, 
+                    Instruction = "44. What is the main purpose of this post from Kenny's blog?", 
+                    ExpectedAnswer = "D", 
+                    Options = new() { new TaskOption { Label = "A", Text = "to explain why he is scared of spiders" }, new TaskOption { Label = "B", Text = "to recommend avoiding spiders to readers" }, new TaskOption { Label = "C", Text = "to persuade all readers to visit the London Zoo" }, new TaskOption { Label = "D", Text = "to describe his experience with a London Zoo programme" } } 
+                },
+
+                // ČÁST 8: Čtení 45-49 (Přiřazování)
+                new CermatTask { 
+                    TaskNumber = "45-49", Category = TaskCategory.Matching, MaxPoints = 10, 
+                    Instruction = "Přiřaďte k požadavkům pěti turistů (45-49) vždy jednu z nabídek (A-G). Dvě nabídky jsou navíc.", 
+                    TextBase = @"<div class='space-y-4'>
+                        <h4 class='text-xl font-bold mb-2'>New York City Skyscrapers</h4>
+                        <div class='grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm text-justify'>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>A) 30 Rockefeller Plaza</b><br>This skyscraper is almost a century old. Use a lift to get to the top on the 66th floor from where you can get a great view of the many 21st-century buildings around. We are open from 8 am to 7 pm every day except for Wednesdays and Thursdays; but they are planned to become open days as well in about a year. Don't forget to visit the very popular restaurant The Rainbow Room on one of the top floors! www.rockefellercenter.com.
+                            </div>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>B) Times Square Tower</b><br>The construction of this building was finished just after the turn of the 21st century. It was built on a place where a smaller building, built in 1909, once stood. We are open from Monday to Friday from noon to 7 pm. We will take you up to the 48th floor. This top floor isn't as high as other buildings' top floors, but the view is great. Visitors only wish there was a restaurant in the building too. More on www.tstnyc.com.
+                            </div>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>C) The Empire State Building</b><br>Do you want to visit this iconic skyscraper? We are open for visitors on Mondays and Wednesdays. To book tickets you can call on Tuesdays or Fridays. You may know that our building with its popular restaurant represents the architecture of the 1930s. At the start of the 21st century, the Empire State Building with its 102 floors was the 6th highest building in the USA. More information on www.esbnyc.com.
+                            </div>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>D) The Chrysler Building</b><br>As the first skyscraper in the world, with its 77 floors, when built it was higher than the Eiffel Tower in Paris. The building was designed in the Art Deco style, a typical style for the 1930s - the era it was built. In the 21st century, it is still the eleventh-highest skyscraper in New York. There has never been a restaurant there. The building is open to visitors from Tuesday to Friday. Book your visit at www.chryslerbuilding.com!
+                            </div>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>E) One World Trade Centre</b><br>See the New York City skyline from over 100 floors above the streets. It is now the highest point in the city. There is so much to admire in this building from 2014 and also the impressive view from the restaurant, called One Dining located on the top floor is hard to forget. We are open every day from 9 am to 10 pm except for Fridays. Go to our website www.onewtc.com and book your ticket!
+                            </div>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>F) The Woolworth Building</b><br>This is one of the oldest skyscrapers in the city, built in 1913. If getting to the top on the 55th floor is enough for you then come to visit. Opening times are Mondays, Thursdays and Fridays from 8 am to noon and from 1:30 pm to 6 pm. There is a stylish restaurant on the top floor. You can see other great skyscrapers in the city from there, even those with over 100 floors. More information and tickets on www.woolworthbuilding.com.
+                            </div>
+                            <div class='glass-card p-4 rounded-xl border border-sky-500/20'>
+                                <b class='text-sky-600 dark:text-sky-400'>G) 30 Hudson Yards</b><br>Built in 2019, Hudson Yards is one of the youngest skyscrapers in New York built together with a whole new neighbourhood and a subway station. There are 73 office floors and a famous restaurant with a fancy bar on the 101st floor with a viewpoint called The Edge. You can visit us from Tuesday to Friday, Monday is the only weekday we are closed. Call us or book your visit directly with www.edgenyc.com.
+                            </div>
+                        </div>
+                    </div>",
+                    Items = new() { 
+                        new SubItem { Id = "45", Text = "Gertrude: Arrives Monday (free only Monday). Wants after 2000, >70 floors, restaurant not needed.", ExpectedAnswer = "E" }, 
+                        new SubItem { Id = "46", Text = "Hao: 20th century, >45 floors. Free only on Tuesday. Must have a restaurant.", ExpectedAnswer = "A" }, 
+                        new SubItem { Id = "47", Text = "Dominique: Before 2000, 45+ floors. Free only Wednesday. Must have restaurant.", ExpectedAnswer = "C" }, 
+                        new SubItem { Id = "48", Text = "Satoaki: 20th century, >70 floors. Thursday. Restaurant doesn't matter.", ExpectedAnswer = "D" }, 
+                        new SubItem { Id = "49", Text = "Manuela: 21st century, >70 floors. Friday. Must have lunch in restaurant.", ExpectedAnswer = "G" } 
+                    },
+                    Options = new() { 
+                        new TaskOption { Label = "A", Text = "30 Rockefeller Plaza" }, 
+                        new TaskOption { Label = "B", Text = "Times Square Tower" }, 
+                        new TaskOption { Label = "C", Text = "The Empire State Building" }, 
+                        new TaskOption { Label = "D", Text = "The Chrysler Building" }, 
+                        new TaskOption { Label = "E", Text = "One World Trade Centre" }, 
+                        new TaskOption { Label = "F", Text = "The Woolworth Building" }, 
+                        new TaskOption { Label = "G", Text = "30 Hudson Yards" } 
+                    } 
+                },
+
+                // ČÁST 9: Čtení 50-59 (Doplňování z možností)
+                new CermatTask { 
+                    TaskNumber = "50-54", Category = TaskCategory.Filling, MaxPoints = 5, InputFieldsCount = 5, 
+                    Instruction = "Na základě textu doplňte do každé mezery [50-54] správné písmeno (A, B, nebo C).", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>Fire in Southern California</h4>
+                        <p class='text-sm text-justify leading-relaxed mb-4'>Dramatic events took place last week in Southern California. A young boy admitted to his parents that he was playing with matches <b>[ 50 ]</b> a windy day. As a strong, extremely dry wind <b>[ 51 ]</b> at that time, a huge fire started almost immediately. People escaped only with the clothes they <b>[ 52 ]</b> on, their pets, and their mobile phones. <b>[ 53 ]</b> the fire engines arrived quickly, the fire destroyed 12 homes. Surprisingly, the boy's parents' house was not touched by the fire.</p>
+                        <p class='text-sm text-justify leading-relaxed'>The police are not in favour of punishing the boy or his parents, but they <b>[ 54 ]</b> an official decision about that yet.</p>
+                        <ul class='mt-4 text-xs space-y-1 font-medium'>
+                            <li><b>50:</b> A) at, B) in, C) on</li>
+                            <li><b>51:</b> A) blows, B) has blown, C) was blowing</li>
+                            <li><b>52:</b> A) wore, B) had, C) dressed</li>
+                            <li><b>53:</b> A) Although, B) However, C) In spite</li>
+                            <li><b>54:</b> A) aren't made, B) didn't make, C) haven't made</li>
+                        </ul>
+                    </div>", 
+                    ExpectedInputs = new[] { "C", "C", "B", "A", "C" } 
+                },
+                new CermatTask { 
+                    TaskNumber = "55-59", Category = TaskCategory.Filling, MaxPoints = 5, InputFieldsCount = 5, 
+                    Instruction = "Na základě textu doplňte do každé mezery [55-59] správné písmeno (A, B, nebo C).", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <p class='text-sm text-justify leading-relaxed mb-4'>Maybe the parents will <b>[ 55 ]</b> pay for the damaged houses and things. However, collecting so much money from the middle-class family will probably not happen. The owners of the destroyed houses disagree on what should be done. 'We don't have <b>[ 56 ]</b> houses now,' said one of them. 'It will take time to build new ones, and our insurance is only going <b>[ 57 ]</b> for half the cost of it. I'd say that the boy's parents ought to go to prison.'</p>
+                        <p class='text-sm text-justify leading-relaxed'>'We all <b>[ 58 ]</b> mistakes, especially when we're young,' said Michael Richards. He is another man <b>[ 59 ]</b> house burned down. 'I'm sure the boy didn't mean to start a fire. Let's forgive him.'</p>
+                        <ul class='mt-4 text-xs space-y-1 font-medium'>
+                            <li><b>55:</b> A) must, B) have to, C) should</li>
+                            <li><b>56:</b> A) any, B) no, C) some</li>
+                            <li><b>57:</b> A) paying, B) pay, C) to pay</li>
+                            <li><b>58:</b> A) do, B) make, C) take</li>
+                            <li><b>59:</b> A) which, B) who, C) whose</li>
+                        </ul>
+                    </div>", 
+                    ExpectedInputs = new[] { "B", "A", "C", "B", "C" } 
+                },
+
+                // ČÁST 10: Čtení 60-64 (Doplňování jednoho slova)
+                new CermatTask { 
+                    TaskNumber = "60-64", Category = TaskCategory.Filling, MaxPoints = 10, InputFieldsCount = 5, 
+                    Instruction = "Doplňte do každé z úloh [ 60-64 ] vždy JEDNO vhodné slovo ve správném tvaru.", 
+                    TextBase = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl'>
+                        <h4 class='text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-4'>The Cookie Thief at the Airport</h4>
+                        <p class='text-sm text-justify leading-loose'>A 42-year-old French woman was waiting at the Charles de Gaulle Airport for her flight to Marseille one day. She bought a book and a pack of cookies. She <b>[ 60 ]</b> down on a seat with her cookies and her book, which she began reading. Suddenly she noticed that the man sitting next to her took a cookie <b>[ 61 ]</b> the pack. And guess what? He continued doing it! With each cookie she took, he took one too. The woman was angry with the man <b>[ 62 ]</b> was eating the cookies. However, she <b>[ 63 ]</b> not tell him how upset she was. Then she boarded the <b>[ 64 ]</b> and shortly after it had taken off, she found her pack of cookies in her luggage. It was still unopened!</p>
+                    </div>", 
+                    ExpectedInputs = new[] { "sat", "from", "who/that", "did/could/would", "plane/aeroplane/airplane/flight" } 
+                }
+            };
         }
 
         private List<CermatTask> GetC9D2025()
