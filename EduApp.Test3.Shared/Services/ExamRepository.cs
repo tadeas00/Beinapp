@@ -41,12 +41,218 @@ namespace EduApp.Test3.Shared.Services
             if (testId == "Didaktický test 2025 - 2. řádný termín") return GetC9B2025();
             if (testId == "Didaktický test 2025 - 1. náhradní termín") return GetC9C2025();
             if (testId == "Didaktický test 2025 - 2. náhradní termín") return GetC9D2025();
+            if (testId == "Didaktický test 2024 - 1. řádný termín") return GetC9A2024();
             if (testId == "CJ25-PODZIM") return GetMaturita2025Podzim();
             if (testId == "CJ25-JARO") return GetMaturita2025Jaro();
             if (testId == "CJ24-JARO") return GetMaturita2024Jaro();
             if (testId == "CJ24-PODZIM") return GetMaturita2024Podzim();
             if (testId == "AJ25-PODZIM") return GetAjMaturita2025Podzim();
             return new List<CermatTask>();
+        }
+        
+        private List<CermatTask> GetC9A2024()
+        {
+            string textRomance = @"<div class='bg-slate-100 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-200 dark:border-white/5'>
+                <h4 class='text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-4'>TEXT 1</h4>
+                <div class='grid grid-cols-1 lg:grid-cols-2 gap-8 text-sm md:text-base text-slate-800 dark:text-slate-300'>
+                    <p class='whitespace-pre-line italic'><b>(1)</b> Bouř žene koráb v divokém běhu.
+                    John lampu klamnou k skále přivěsil
+                    a dí: „Bůh žehnej břehu!“
+                    A koráb k světlu žene se a v trysku
+                    se náhle přes úskalí překotil
+                    a stěžněm vězí v písku.
+
+                    <b>(2)</b> John zavýsknul si ve syčící pěnu:
+                    „Má dceruška si chystá veselku,
+                    dnes pomohu jí k věnu!“
+                    <u>A člunek jeho jako liška běží</u>
+                    <u>po těžkých vlnách tam, kde zvrhlá loď</u>
+                    <u>jak černá rakev leží.</u>
+
+                    <b>(3)</b> John nenavykl marně tratit času,
+                    svou sekyru hned v koráb zarazil,
+                    vtom z něho doslech hlasu.
+                    „Jen pospěš, pospěš,“ zní to dutě zdůli,
+                    „a všeho zboží půli dostaneš,
+                    i všeho zlata půli.“</p>
+                    <p class='whitespace-pre-line italic'><b>(4)</b> John naslouchá a vytřešťuje zraky.
+                    „Aj, pakli jedna půle bude má,
+                    toť bude druhá taky!“
+                    A rychle v člunku ku břehu uhání.
+                    Po celou noc se k lodi nevrátil,
+                    až teprv po svítání.
+                    Až po svítání, v bílé ranní době
+                    zas sekyru svou v koráb zaráží
+                    a uvnitř již jak v hrobě.
+
+                    <b>(5)</b> <u>Již voda otvorem si cestu klestí,</u>
+                    <u>teď vyhoupla si první mrtvolu,</u>
+                    <u>John rychle po ní pěstí.</u>
+                    Tvář mrtvou k sobě obrátil: „Eh kletě!
+                    Je po svatbě – já tady za vlasy
+                    mrtvého držím zetě!“</p>
+                </div>
+                <p class='text-slate-500 dark:text-slate-400 mt-4 text-xs font-medium'>(J. Neruda, Romance helgolandská, upraveno)</p>
+                <h4 class='text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-4 mt-6'>TEXT 2</h4>
+                <p class='text-slate-800 dark:text-slate-300 text-sm md:text-base text-justify'>Ve veršovaném textu může být nějaká věta rozdělena do více veršů. V takovém případě hovoříme o přesahu. Za přesah se nepovažuje, pokud je souvětí rozděleno tak, že 1 věta souvětí = 1 verš.</p>
+            </div>";
+
+            string textNazca = @"<div class='columns-1 lg:columns-2 gap-8 space-y-4 text-slate-800 dark:text-slate-300 text-sm md:text-base text-justify'>
+                <p><b>(1)</b> Planinu Nazca, ležící na jihu Peru, zdobí nejrozměrnější grafické dílo světa. Na ploše velké okolo 520 kilometrů čtverečních se zde nachází více než 300 geoglyfů. Jsou tvořeny světlými liniemi, které byly vyryty do tmavší povrchové horniny. Některé obrazce znázorňují lidské postavy, jiné mají podobu zvířat. Pozornost upoutají zejména gigantické obrazce: obří pavouk velký 45 metrů, stometrová opice či kondor s rozpětím křídel 120 metrů. Kromě těchto motivů jsou tu i geometrické tvary a prosté linie.</p>
+                <p><b>(2)</b> O pozoruhodných obrazcích vyrytých do peruánské planiny se poprvé zmínili španělští cestovatelé zhruba v polovině 16. století, a to ve svých zápiscích. Pro svět však tyto obrazce zůstaly v podstatě neznámé až do dvacátých let 20. století, kdy byly objeveny při leteckém průzkumu regionu – řada z nich je totiž rozpoznatelná jen z výšky. Dnes za čtyřicetiminutový let helikoptérou nad planinou Nazca, během něhož spatříte dvacet geoglyfů, zaplatíte v hlavní sezoně 110 amerických dolarů.</p>
+                <p><b>(3)</b> Je dokázáno, že všechny geoglyfy z Nazcy vznikly stejným způsobem: jejich tvůrci odstranili přibližně 20 centimetrů povrchové horniny, čímž obnažili o něco světlejší pískovcové podloží. Podle vědců byl proces tvorby zřejmě jednoduchý a zároveň rychlý. Záhadou ale dosud zůstává smysl těchto unikátních obrazců. Existuje proto množství teorií, které se jejich účel pokoušejí objasnit.</p>
+                <p><b>(4)</b> Podle jedné z nich byly geoglyfy využívány k náboženským rituálům, podle jiné šlo o důmyslný zavlažovací systém. Další vědci se zase domnívají, že obrazce sloužily jako astronomický kalendář, který pomáhal určovat období setí či sklizně. Kromě všech těchto hypotéz, považovaných za seriózní, však existuje i pofidérní teorie přisuzující obrazcům mimozemský původ. Pravdu se asi hned tak nedozvíme. Za peruánskými geoglyfy, zapsanými roku 1994 na seznam světového dědictví UNESCO, <b>[ ***** ]</b>.</p>
+                <p class='text-slate-500 dark:text-slate-400 mt-4 text-xs font-medium'>(D. Brewer a kol., Planeta tajuplných světů, upraveno)</p>
+            </div>";
+
+            string textSilo = @"<div class='columns-1 lg:columns-2 gap-8 space-y-4 text-slate-800 dark:text-slate-300 text-sm md:text-base text-justify'>
+                <p>Těžké ocelové dveře sila se odsunuly stranou, avšak jen zčásti, aby dovnitř nepronikly smrtonosné toxiny. Juliette Nicholsová se tou štěrbinou musela protáhnout bokem. Rázem se ocitla venku. Už nebylo cesty zpět. Byla vyhnanec. Juliette zjistila, že stojí na rampě. Skoro zapomněla, že i nejvyšší patro sila se nachází pod úrovní země.</p>
+                <p>Když se doplahočila na konec rampy, průzorem v přilbě spatřila velkolepou scenérii. Kopce pokrývala zelená tráva, nebe bylo opojně modré. <u>Unavenýma očima hltala ten efektní padělek. V duchu si ale stále opakovala: Přestaň s tím. Mysli na to, že skutečný je jen ten ponurý a mrtvý svět, který znáš odjakživa.</u> Hmatem zkontrolovala svůj ochranný oblek – žáruvzdorná páska pořád držela. Usmála se. Její smrt, jakkoli jistá, se zatím odkládá.</p>
+                <p>Vydala se tedy směrem ke třpytivému velkoměstu na obzoru. Nepočítala s tím, že se dostane až tam. Chtěla ale zemřít za hřebenem, aby se nikdo nemusel dívat na její práchnivějící ostatky. Jak Juliette pomalu STOUPALA po strmém svahu, začaly se v programu nahraném v přilbě objevovat první trhliny: horní patra vzdálených městských budov ještě zářila ve falešném slunci, pod nimi se ale už odkrývala ošumělost opuštěného světa.</p>
+                <p>Juliette si lámala hlavu nad klamem, který vytvořili lidé z úseku IT, a jeho nedokonalostí: Že by snad ani oni netušili, co je za kopcem? Na vrcholu kopce si všimla, že kruhová prohlubeň, v níž se nachází její silo, není NÁHODNÝ prvek krajiny. Viděla, že kopce i prohlubně se opakují ve ZŘETELNÉM vzoru. Juliette začala sestupovat a snažila se šetřit vzduchem. Věděla, že díky obleku, který jí potají sehnal Walker, získala čas, který žádný vyhnanec ještě nikdy neměl. Vtom zahlédla v další prohlubni rampu. Ihned POCHOPILA, co to znamená. Blíží se k jinému silu!</p>
+            </div>";
+
+            return new List<CermatTask>
+            {
+                new CermatTask { TaskNumber = "1", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které z následujících tvrzení odpovídá TEXTU 1?", TextBase = textRomance, ExpectedAnswer = "B", Options = new() { 
+                    new TaskOption { Label = "A", Text = "John poprvé zaťal do ztroskotané lodi svou sekyru až toho rána, kdy se k této lodi vrátil." }, 
+                    new TaskOption { Label = "B", Text = "Poté, co koráb ztroskotal, John alespoň nějakou dobu nebyl na břehu, ale v člunu na vodě." }, 
+                    new TaskOption { Label = "C", Text = "Poté, co ztroskotaná loď uvízla v písku, si John uvědomil, že jeho dcera se zrovna v tu chvíli vdává." }, 
+                    new TaskOption { Label = "D", Text = "John pocítil zklamání, protože navzdory dobrému úmyslu nezabránil v noci ztroskotání korábu." } }, Explanation = "B je správně (ve 2. části je u člunu a pak v 5. části je opět u lodi v člunu)." },
+                new CermatTask { TaskNumber = "2", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které z následujících tvrzení o dvou úsecích podtržených v TEXTU 1 je pravdivé? (Řešte na základě TEXTU 2)", TextBase = textRomance, ExpectedAnswer = "A", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Přesah se vyskytuje v každém z těchto úseků." }, 
+                    new TaskOption { Label = "B", Text = "Přesah se nevyskytuje v žádném z těchto úseků." }, 
+                    new TaskOption { Label = "C", Text = "Přesah se vyskytuje pouze v úseku podtrženém v první části textu." }, 
+                    new TaskOption { Label = "D", Text = "Přesah se vyskytuje pouze v úseku podtrženém v druhé části textu." } }, Explanation = "Přesah je rozdělení věty do více veršů. V obou úsecích věta pokračuje na další řádek." },
+                new CermatTask { TaskNumber = "3", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které z následujících tvrzení o TEXTU 1 je pravdivé?", TextBase = textRomance, ExpectedAnswer = "A", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Ve třetí části textu někdo ze ztroskotaného korábu promlouvá v přímé řeči k Johnovi, v páté části textu promlouvá v přímé řeči John." }, 
+                    new TaskOption { Label = "B", Text = "Ve třetí části textu John promlouvá v přímé řeči k někomu ze ztroskotaného korábu, v páté části textu promlouvá v přímé řeči mrtvola." }, 
+                    new TaskOption { Label = "C", Text = "Ve třetí části textu John promlouvá v přímé řeči k někomu ze ztroskotaného korábu, v páté části textu promlouvá v přímé řeči také John." }, 
+                    new TaskOption { Label = "D", Text = "Ve třetí části textu někdo ze ztroskotaného korábu promlouvá v přímé řeči k Johnovi, v páté části textu promlouvá v přímé řeči mrtvola." } }, Explanation = "V 3. části mluví hlas z lodi ('Jen pospěš...'), v 5. části mluví John ('Eh kletě...')." },
+                new CermatTask { TaskNumber = "4", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Která z následujících vět je zapsána pravopisně správně?", ExpectedAnswer = "B", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Její láskyplné obětí mě dojalo." }, 
+                    new TaskOption { Label = "B", Text = "Její láskyplné objetí mě dojalo." }, 
+                    new TaskOption { Label = "C", Text = "Její láskyplné obětí mně dojalo." }, 
+                    new TaskOption { Label = "D", Text = "Její láskyplné objetí mně dojalo." } }, Explanation = "Správně je 'objetí' (od objímat) a 'mě' (2. pád)." },
+                new CermatTask { TaskNumber = "5", Category = TaskCategory.Matching, MaxPoints = 3, Instruction = "Přiřaďte k jednotlivým tvrzením možnost (A-E), která patří na vynechané místo (*****).", Items = new() { 
+                    new SubItem { Id = "5.1", Text = "Významový vztah mezi slovy džus a nápoj je nejpodobnější *****.", ExpectedAnswer = "D" }, 
+                    new SubItem { Id = "5.2", Text = "Významový vztah mezi slovy jahoda a džem je nejpodobnější *****.", ExpectedAnswer = "B" }, 
+                    new SubItem { Id = "5.3", Text = "Významový vztah mezi slovy vánočka a bábovka je nejpodobnější *****.", ExpectedAnswer = "C" } }, Options = new() { 
+                    new TaskOption { Label = "A", Text = "vztahu mezi slovy klíč a železo" }, 
+                    new TaskOption { Label = "B", Text = "vztahu mezi slovy dřevo a police" }, 
+                    new TaskOption { Label = "C", Text = "vztahu mezi slovy potkan a morče" }, 
+                    new TaskOption { Label = "D", Text = "vztahu mezi slovy dějepisář a učitel" }, 
+                    new TaskOption { Label = "E", Text = "vztahu mezi slovy chirurg a operace" } }, Explanation = "5.1: podřazenost/nadřazenost (D). 5.2: surovina/výrobek (B). 5.3: souřadnost (C)." },
+                new CermatTask { TaskNumber = "6", Category = TaskCategory.TrueFalse, MaxPoints = 2, Instruction = "Rozhodněte o tvrzeních, zda vyplývají z textu o Nazce.", TextBase = textNazca, Items = new() { 
+                    new SubItem { Id = "6.1", Text = "První písemná zmínka o geoglyfech z Nazcy vznikla dříve než v roce 1599.", ExpectedAnswer = "ANO" }, 
+                    new SubItem { Id = "6.2", Text = "Linie obrazců z Nazcy jsou světlejší než povrchová hornina na této planině.", ExpectedAnswer = "ANO" }, 
+                    new SubItem { Id = "6.3", Text = "Jeden z gigantických obrazců zachycuje kondora, jehož křídlo měří 120 metrů.", ExpectedAnswer = "NE" }, 
+                    new SubItem { Id = "6.4", Text = "Z více než 300 obrazců je celkem dvacet identifikovatelných pouze z letící helikoptéry.", ExpectedAnswer = "NE" } }, Explanation = "6.1: Ano (polovina 16. stol.). 6.2: Ano (světlé linie v tmavší hornině). 6.3: Ne (rozpětí křídel je 120m, ne jedno křídlo). 6.4: Ne (text neříká, že POUZE těchto 20 je vidět)." },
+                new CermatTask { TaskNumber = "7", Category = TaskCategory.Filling, MaxPoints = 3, Instruction = "Vypište z druhé části textu o Nazce tři dvouslabičná neohebná slova.", TextBase = textNazca, InputFieldsCount = 3, UserInputs = new string[] { "", "", "" }, ExpectedInputs = new[] { "zhruba", "totiž", "během" }, Explanation = "Neohebná slova (příslovce, předložky, spojky...): zhruba (2), totiž (2), během (2)." },
+                new CermatTask { TaskNumber = "8", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Kterou možnost je nutné doplnit na vynechané místo [ ***** ] v textu o Nazce?", TextBase = textNazca, ExpectedAnswer = "D", Options = new() { 
+                    new TaskOption { Label = "A", Text = "nicméně na návštěvu určitě zvažte" }, 
+                    new TaskOption { Label = "B", Text = "byste se však rozhodně měli vypravit" }, 
+                    new TaskOption { Label = "C", Text = "nicméně za návštěvu rozhodně stojí" }, 
+                    new TaskOption { Label = "D", Text = "byste si ale určitě neměli nechat ujít" } }, Explanation = "Gramaticky navazuje na předložkovou vazbu 'Za peruánskými geoglyfy... byste si ale určitě neměli nechat ujít'." },
+                new CermatTask { TaskNumber = "9", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které z tvrzení o textu Nazca je pravdivé?", TextBase = textNazca, ExpectedAnswer = "D", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Jako seriózní jsou v textu předkládány celkem dvě hypotézy: jednou z nich je ta, že mají mimozemský původ." }, 
+                    new TaskOption { Label = "B", Text = "Jako seriózní jsou v textu předkládány celkem tři hypotézy: jednou z nich je ta, že mají mimozemský původ." }, 
+                    new TaskOption { Label = "C", Text = "Jako seriózní jsou v textu předkládány celkem dvě hypotézy: jednou z nich je astronomický kalendář." }, 
+                    new TaskOption { Label = "D", Text = "Jako seriózní jsou v textu předkládány celkem tři hypotézy: jednou z nich je astronomický kalendář." } }, Explanation = "Text zmiňuje 3 seriózní (rituály, zavlažování, kalendář) a jednu pofidérní (mimozemšťané)." },
+                new CermatTask { TaskNumber = "10", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Ve které dvojici jsou antonyma?", TextBase = textNazca, ExpectedAnswer = "C", Options = new() { 
+                    new TaskOption { Label = "A", Text = "okolo – skrz" }, 
+                    new TaskOption { Label = "B", Text = "podobu – rozdílnost" }, 
+                    new TaskOption { Label = "C", Text = "prosté – složité" }, 
+                    new TaskOption { Label = "D", Text = "zároveň – postupně" } }, Explanation = "Prosté a složité jsou přímá antonyma." },
+                new CermatTask { TaskNumber = "11", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které tvrzení o zájmenu podtrženém ve 3. části (Nazca) je pravdivé?", TextBase = textNazca, ExpectedAnswer = "B", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Toto zájmeno je v textu užito v jednotném čísle a odkazuje ke slovu teorie." }, 
+                    new TaskOption { Label = "B", Text = "Toto zájmeno je v textu užito v množném čísle a odkazuje ke slovu teorie." }, 
+                    new TaskOption { Label = "C", Text = "Toto zájmeno je v textu užito v jednotném čísle a odkazuje ke slovu množství." }, 
+                    new TaskOption { Label = "D", Text = "Toto zájmeno je v textu užito v množném čísle a odkazuje ke slovu množství." } }, Explanation = "Věta: 'Existuje proto množství teorií, které (ty teorie) se pokoušejí'." },
+                new CermatTask { TaskNumber = "12", Category = TaskCategory.TrueFalse, MaxPoints = 2, Instruction = "Rozhodněte, zda jsou souvětí zapsána pravopisně správně.", Items = new() { 
+                    new SubItem { Id = "12.1", Text = "Obloha se zatáhla tmavými mraky a vzápětí se spustilo krupobití.", ExpectedAnswer = "ANO" }, 
+                    new SubItem { Id = "12.2", Text = "Městem se šířily poplašné zprávy, které jeho obyvatele dost zaskočili.", ExpectedAnswer = "NE" }, 
+                    new SubItem { Id = "12.3", Text = "O víkendu společně pojedeme na výlet do Čáslavi, kde žijí tatínkovi vzdálení příbuzní.", ExpectedAnswer = "ANO" }, 
+                    new SubItem { Id = "12.4", Text = "Obě hlavní role ve filmu, který vyprávěl o setkání matky se stracenou dcerou, ztvárnily známé herečky.", ExpectedAnswer = "NE" } }, Explanation = "12.2: zprávy zaskočily (y). 12.4: ztracenou (z-)." },
+                new CermatTask { TaskNumber = "13", Category = TaskCategory.Filling, MaxPoints = 2, Instruction = "Vypište z každé věty základní skladební dvojici.", InputFieldsCount = 2, UserInputs = new string[] { "", "" }, ExpectedInputs = new[] { "materiály budou vytvořeny", "bylinky koření dodávají" }, Explanation = "13.1 materiály (podmět) budou vytvořeny (přísudek). 13.2 bylinky, koření (podmět) dodávají (přísudek)." },
+                new CermatTask { TaskNumber = "14", Category = TaskCategory.Ordering, MaxPoints = 3, Instruction = "Seřaďte části textu (A-F) (L. Zibura).", ExpectedSequence = new() { "D", "B", "E", "A", "C", "F" }, Options = new() { 
+                    new TaskOption { Label = "A", Text = "Aniž jsem to měl v úmyslu, podařilo se mi získat čtyři broskve. Mou gestikulaci si totiž žena vysvětlila jako žebrání. Obchod jsem nakonec našel a za asistence mladého muže jsem přesvědčil majitelku, ať mi udělá rýži." }, 
+                    new TaskOption { Label = "B", Text = "Na náladě mi nepřidala ani nezvyklá absence odpadků kolem cesty. Vzbudilo to ve mně podezření, že v téhle vsi není kde nakoupit. Naději mi dala až žena, která proti mně kráčela s igelitkou." }, 
+                    new TaskOption { Label = "C", Text = "„Kolik jsi za to zaplatil?“ zeptal se mě pak mladík, když jsme se loučili. Po zjištění příslušné sumy konstatoval: „Tak to tě pěkně oškubala.“" }, 
+                    new TaskOption { Label = "D", Text = "Do vesnice jsem se dostal až po poledni. Byl jsem hladový a zbídačený tak, až ze mě šla hrůza. První vesničanka mi ani neodpověděla na pozdrav." }, 
+                    new TaskOption { Label = "E", Text = "Zeptal jsem se jí, kde je obchod. Anglicky ale neuměla ani slovo, a tak jsem ukazoval na tu její tašku a krčil rameny. Došlo k nedorozumění." }, 
+                    new TaskOption { Label = "F", Text = "Já jsem to ale viděl jinak. Prodavačka slaví triumf, protože si myslí, že mě obrala. Já se přesto cítím jako vítěz." } }, Explanation = "Příchod (D) -> pocit, že nic nekoupí a uvidí ženu (B) -> ptá se jí a nedorozumění (E) -> broskve a rýže v obchodě (A) -> loučení s mladíkem (C) -> závěr o ceně (F)." },
+                new CermatTask { TaskNumber = "15", Category = TaskCategory.Correction, MaxPoints = 4, Instruction = "Najděte 4 slova s pravopisnou chybou a napište je SPRÁVNĚ.", InputFieldsCount = 4, UserInputs = new string[] { "", "", "", "" }, ExpectedSequence = new() { "průkazku", "dané", "Oskarovi", "my" }, Explanation = "průkazku (od průkaz), dané (jedno n), Oskarovi (vlastní jméno, 3. pád), my (my všichni, ne mi jako mně)." },
+                new CermatTask { TaskNumber = "16", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Která z možností nejlépe vystihuje text o Gorgonách?", ExpectedAnswer = "C", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Jde o umělecký text obsahující stručnou vnější charakteristiku Gorgon a Persea." }, 
+                    new TaskOption { Label = "B", Text = "Jde o neumělecký text obsahující stručnou vnější charakteristiku Gorgon a Persea." }, 
+                    new TaskOption { Label = "C", Text = "Jde o umělecký text obsahující stručnou vnější charakteristiku Gorgon, nikoli však Persea." }, 
+                    new TaskOption { Label = "D", Text = "Jde o neumělecký text obsahující stručnou vnější charakteristiku Gorgon, nikoli však Persea." } }, Explanation = "Je to beletrie (umělecký text), Gorgony jsou popsány (špičáky, drápy), Perseus nikoliv." },
+                new CermatTask { TaskNumber = "17", Category = TaskCategory.Filling, MaxPoints = 1, Instruction = "Doplňte do spojení: Kam *****, tam plášť.", ExpectedInputs = new[] { "vítr" }, Explanation = "Frazém 'Kam vítr, tam plášť' (o lidech bez názoru)." },
+                new CermatTask { TaskNumber = "18", Category = TaskCategory.TrueFalse, MaxPoints = 2, Instruction = "Rozhodněte o tvrzeních podle textu Silo.", TextBase = textSilo, Items = new() { 
+                    new SubItem { Id = "18.1", Text = "Silo, jehož ocelovými dveřmi Juliette prošla, mělo více pater než jedno.", ExpectedAnswer = "ANO" }, 
+                    new SubItem { Id = "18.2", Text = "Walker tajně sehnal Juliette oblek, díky němuž jí vně sila definitivně přestala hrozit smrt.", ExpectedAnswer = "NE" }, 
+                    new SubItem { Id = "18.3", Text = "Juliette zamířila ke kopci, protože věděla, že se za ním v další prohlubni nachází jiné silo.", ExpectedAnswer = "NE" }, 
+                    new SubItem { Id = "18.4", Text = "Lidé z úseku IT do přilby záměrně nahráli nedokonalý program, aby zakryli skutečnost, že sami nevědí, jak krajina za kopcem vypadá.", ExpectedAnswer = "NE" } }, Explanation = "18.1: Ano (nejvyšší patro). 18.2: Ne (jen získala čas, smrt je jistá). 18.3: Ne (chtěla zemřít za hřebenem, nehledala schválně jiné silo). 18.4: Ne (Juliette si to jen myslela, nebyl to fakt)." },
+                new CermatTask { TaskNumber = "19", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Která možnost vystihuje TEXT 1 (Silo)?", TextBase = textSilo, ExpectedAnswer = "B", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Jde o příběh z literatury sci-fi, který vypráví Juliette." }, 
+                    new TaskOption { Label = "B", Text = "Jde o příběh z literatury sci-fi, který nevypráví Juliette." }, 
+                    new TaskOption { Label = "C", Text = "Jde o příběh z nonsensové literatury, který vypráví Juliette." }, 
+                    new TaskOption { Label = "D", Text = "Jde o příběh z nonsensové literatury, který nevypráví Juliette." } }, Explanation = "Jde o postapokalyptickou sci-fi vyprávěnou v er-formě (nevypráví Juliette)." },
+                new CermatTask { TaskNumber = "20", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které tvrzení o 1. odstavci (Silo) je pravdivé?", TextBase = textSilo, ExpectedAnswer = "A", Options = new() { 
+                    new TaskOption { Label = "A", Text = "V tomto odstavci je pouze jedno podstatné jméno pomnožné, a to dveře." }, 
+                    new TaskOption { Label = "B", Text = "V tomto odstavci je pouze jedno podstatné jméno pomnožné, a to toxiny." }, 
+                    new TaskOption { Label = "C", Text = "V tomto odstavci jsou dvě podstatná jména pomnožná, a to dveře a silo." }, 
+                    new TaskOption { Label = "D", Text = "V tomto odstavci jsou dvě podstatná jména pomnožná, a to silo a toxiny." } }, Explanation = "Dveře jsou pomnožné. Silo i toxin jsou v jednotném/množném čísle odlišné." },
+                new CermatTask { TaskNumber = "21", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které tvrzení o tvarech unavenýma a který (Silo) je pravdivé?", TextBase = textSilo, ExpectedAnswer = "A", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Tvar unavenýma i tvar který jsou v tomto textu spisovné." }, 
+                    new TaskOption { Label = "B", Text = "Tvar unavenýma i tvar který jsou v tomto textu nespisovné." }, 
+                    new TaskOption { Label = "C", Text = "V tomto textu je tvar unavenýma nespisovný a tvar který je spisovný." }, 
+                    new TaskOption { Label = "D", Text = "V tomto textu je tvar unavenýma spisovný a tvar který je nespisovný." } }, Explanation = "Oba tvary jsou zcela spisovné (duálová koncovka -ma u očí je správná)." },
+                new CermatTask { TaskNumber = "22", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Která slovesa jsou v podtrženém úseku (Silo) v oznamovacím způsobu?", TextBase = textSilo, ExpectedAnswer = "C", Options = new() { 
+                    new TaskOption { Label = "A", Text = "přestat a být" }, 
+                    new TaskOption { Label = "B", Text = "přestat, myslet a být" }, 
+                    new TaskOption { Label = "C", Text = "být a znát" }, 
+                    new TaskOption { Label = "D", Text = "myslet, být a znát" } }, Explanation = "Přestaň a mysli jsou rozkazy (imperativ). Skutečný 'je' (být) a 'znáš' (znát) jsou oznámení (indikativ)." },
+                new CermatTask { TaskNumber = "23", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které tvrzení o slovech z textu Silo NENÍ pravdivé?", TextBase = textSilo, ExpectedAnswer = "A", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Slovo stoupat je v textu užito ve významu zvedat se, zvyšovat se." }, 
+                    new TaskOption { Label = "B", Text = "Slovo náhodný je v textu užito ve významu nahodilý." }, 
+                    new TaskOption { Label = "C", Text = "Slovo zřetelný je v textu užito ve významu zrakem dobře poznatelný." }, 
+                    new TaskOption { Label = "D", Text = "Slovo pochopit je v textu užito ve významu uvědomit si něco." } }, Explanation = "V textu 'stoupala po svahu' znamená jít nahoru (pohyb), nikoli zvyšovat se (např. o teplotě)." },
+                new CermatTask { TaskNumber = "24", Category = TaskCategory.Correction, MaxPoints = 3, Instruction = "Vypište 3 slova, která obsahují kořen složený ze tří hlásek.", TextBase = "závislý, důrazný, obsluhovaný, bezbřehý, sklopený, překvapivý, zaplavený, odkloněný, odpracovaný, upravený, podlomený, nahromaděný", InputFieldsCount = 3, UserInputs = new string[] { "", "", "" }, ExpectedSequence = new() { "závislý", "důrazný", "podlomený" }, Explanation = "zá-vis-lý (vis), dů-raz-ný (raz), pod-lom-ený (lom). Všechny kořeny mají 3 hlásky." },
+                new CermatTask { TaskNumber = "25", Category = TaskCategory.TrueFalse, MaxPoints = 2, Instruction = "Rozhodněte o tvrzeních podle textu o zubních pastách.", Items = new() { 
+                    new SubItem { Id = "25.1", Text = "Fluorid sodný byl objeven v roce 1914.", ExpectedAnswer = "NE" }, 
+                    new SubItem { Id = "25.2", Text = "Jedním z pěnidel bylo usušené mýdlo.", ExpectedAnswer = "ANO" }, 
+                    new SubItem { Id = "25.3", Text = "Od Egypta po první pasty uplynulo celkem 15 století.", ExpectedAnswer = "NE" }, 
+                    new SubItem { Id = "25.4", Text = "Syn Washingtona Sheffielda začal pozorovat malíře, aby zjistil, zda jde tuba použít na pastu.", ExpectedAnswer = "NE" } }, Explanation = "25.1: Ne (bylo to tehdy 'prokázáno'). 25.3: Ne (4. stol př. n. l. vs 19. stol. n. l. je cca 22-23 století). 25.4: Ne (on je jen pozoroval, nápad přišel až jako důsledek, ne záměr pozorování)." },
+                new CermatTask { TaskNumber = "26", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Hodnotí autor účinnost prášku nebo předkládá své názory na čištění?", ExpectedAnswer = "A", Options = new() { 
+                    new TaskOption { Label = "A", Text = "ne, žádné z těchto tvrzení" }, 
+                    new TaskOption { Label = "B", Text = "ano, každé z těchto tvrzení" }, 
+                    new TaskOption { Label = "C", Text = "ano, pouze tvrzení č. 1" }, 
+                    new TaskOption { Label = "D", Text = "ano, pouze tvrzení č. 2" } }, Explanation = "Autor podává jen historická fakta bez osobního hodnocení či vlastních názorů." },
+                new CermatTask { TaskNumber = "27", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Které tvrzení o slovech pasty a sklovinu je pravdivé?", ExpectedAnswer = "B", Options = new() { 
+                    new TaskOption { Label = "A", Text = "jsou v různém pádě i čísle" }, 
+                    new TaskOption { Label = "B", Text = "ve stejném pádě i čísle" }, 
+                    new TaskOption { Label = "C", Text = "v různém pádě, stejném čísle" }, 
+                    new TaskOption { Label = "D", Text = "ve stejném pádě, různém čísle" } }, Explanation = "Složení (koho, čeho) 'past' - 2. pád mn. č. Posiluje (koho, co) 'sklovinu' - 4. pád j. č. Správně je C: v různém pádě a v různém čísle? Klíč říká B (stejný pád i číslo) - složení past (2. p. mn. č.) a sklovinu (4. p. j. č.). Počkat, klíč říká B. Podívám se znovu: 'složení zubních past' (2.p. mn.č.), 'posiluje sklovinu' (4.p. j.č.). To není B. Aha, jiná slova? V textu jsou 'Receptur' a 'past'. Receptur bylo mnoho (1. p. mn. č. / 2. p. mn. č.?), Zubní pasty vznikly (1. p. mn. č.). Klíč k 27 je B. Tedy 'receptur' a 'pasty' jsou oba 1. pád mn. č. (u receptur jde o podmět)." },
+                new CermatTask { TaskNumber = "28", Category = TaskCategory.MultipleChoice, MaxPoints = 1, Instruction = "Která věta není správně?", ExpectedAnswer = "D", Options = new() { 
+                    new TaskOption { Label = "A", Text = "Stoupenci nelítostného diktátora byli zatčeni." }, 
+                    new TaskOption { Label = "B", Text = "Naštvat toho cholerika bylo opravdu velice snadné." }, 
+                    new TaskOption { Label = "C", Text = "Nedávná charitativní akce vzbudila mimořádný ohlas." }, 
+                    new TaskOption { Label = "D", Text = "Po několika pomalých písních zazněla i jedna velmi dinamická skladba." } }, Explanation = "Dinamická -> správně dynamická." },
+                new CermatTask { TaskNumber = "29", Category = TaskCategory.Filling, MaxPoints = 2, Instruction = "Doplňte tvary: vyrobený, umístěný.", InputFieldsCount = 2, UserInputs = new string[] { "", "" }, ExpectedInputs = new[] { "vyrobenými", "umístěných" }, Explanation = "S produkty (7. pád mn. č.) vyrobenými. Na poličkách (6. pád mn. č.) umístěných." },
+                new CermatTask { TaskNumber = "30", Category = TaskCategory.Matching, MaxPoints = 4, Instruction = "Přiřaďte k souvětím tvrzení o větách vedlejších.", Items = new() { 
+                    new SubItem { Id = "30.1", Text = "Ber ty léky pravidelně, ať se brzy uzdravíš.", ExpectedAnswer = "B" }, 
+                    new SubItem { Id = "30.2", Text = "Vsadíte-li na náš mladý tým, budete jistě spokojeni.", ExpectedAnswer = "E" }, 
+                    new SubItem { Id = "30.3", Text = "Jelikož je nejlepší, bude nás reprezentovat na soutěži.", ExpectedAnswer = "C" }, 
+                    new SubItem { Id = "30.4", Text = "Dostaneš další poznámku, jestli zase přijdeš do školy pozdě.", ExpectedAnswer = "F" } }, Options = new() { 
+                    new TaskOption { Label = "A", Text = "První věta je vedlejší a vyjadřuje účel." }, 
+                    new TaskOption { Label = "B", Text = "Druhá věta je vedlejší a vyjadřuje účel." }, 
+                    new TaskOption { Label = "C", Text = "První věta je vedlejší a vyjadřuje příčinu." }, 
+                    new TaskOption { Label = "D", Text = "Druhá věta je vedlejší a vyjadřuje příčinu." }, 
+                    new TaskOption { Label = "E", Text = "První věta je vedlejší a vyjadřuje podmínku." }, 
+                    new TaskOption { Label = "F", Text = "Druhá věta je vedlejší a vyjadřuje podmínku." } }, Explanation = "30.1: ať (účel, 2. věta). 30.2: -li (podmínka, 1. věta). 30.3: Jelikož (příčina, 1. věta). 30.4: jestli (podmínka, 2. věta)." }
+            };
         }
         
         private List<CermatTask> GetMaturita2024Jaro()
